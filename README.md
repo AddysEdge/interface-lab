@@ -5,19 +5,18 @@
 <br/>
 <br />
 
-# 🧬 Atomox ⚛️
-
-Atomox is a collaborative platform where developers and designers can share, explore, and give feedback on reusable web components. Built for the [Clerk x Midudev hackathon](https://github.com/midudev/hackaton-clerk-2025), Atomox makes it easy to get feedback and inspire others with your UI creations.
+**A place to share and discover reusable UI components.**
 
   <a href="https://atomox.vercel.app">Open the website</a>
 </div>
 
+<br />
 
+## What is Atomox?
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+Atomox is a website where you can browse ready-made UI pieces — buttons, cards, forms, and other small ("atoms") and larger ("molecules") components — built with HTML, CSS, and JavaScript. You can preview how each one looks and works, copy the code, and use it in your own projects.
 
-Atomox is a collaborative platform where developers and designers can share, explore, and give feedback on reusable web components. Whether you're looking to discover creative UI ideas, contribute your own components, or get constructive feedback from the community, Atomox is your playground for modern, component-based web design.
+You can also sign in and share your own components for others to use.
 
 <p align="right"><a href="#top">⬆️ Back to top</a></p>
 
