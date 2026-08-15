@@ -18,9 +18,6 @@ Atomox is a website where you can browse ready-made UI pieces — buttons, cards
 
 You can also sign in and share your own components for others to use.
 
-<p align="right"><a href="#top">⬆️ Back to top</a></p>
-
-
 <!-- SCREENSHOTS -->
 ## 📸 A quick look
 
@@ -43,8 +40,6 @@ You can also sign in and share your own components for others to use.
     </tr>
 </table>
 
-<p align="right"><a href="#top">⬆️ Back to top</a></p>
-
 ## ✨ What you can do
 
 - **Browse components** — Explore a growing library of atoms (small pieces like buttons) and molecules (bigger pieces like full sections), with live previews.
@@ -61,22 +56,20 @@ You can also sign in and share your own components for others to use.
 
 
 <!-- GETTING STARTED -->
-## ⚙️ Getting Started
+## ⚙️ Getting started
 
-1. Clone or fork the repo
-```sh
-git clone https://github.com/cosmoart/atomox
-```
-1. Install NPM packages
-```sh
-npm install
-```
-3. Run the project
-```sh
-npm run dev
-```
-
-<p align="right"><a href="#top">⬆️ Back to top</a></p>
+1. Clone the repository
+   ```sh
+   git clone https://github.com/cosmoart/atomox
+   ```
+2. Install dependencies
+   ```sh
+   npm install
+   ```
+3. Start the app
+   ```sh
+   npm run dev
+   ```
 
 
 <!-- ROADMAP -->
