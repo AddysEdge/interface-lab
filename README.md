@@ -22,23 +22,23 @@ You can also sign in and share your own components for others to use.
 
 
 <!-- SCREENSHOTS -->
-## 📸 Screenshots
+## 📸 A quick look
 
 <table>
     <tr>
       <td>
-          <img src="./readme/home.webp" width="100%" title="Home pages"  />
+          <img src="./readme/home.webp" width="100%" title="Home page"  />
       </td>
       <td>
-          <img src="./readme/buttons.webp" width="100%" title="Buttons page"/>
+          <img src="./readme/buttons.webp" width="100%" title="Browsing components"/>
       </td>
     </tr>
         <tr>
       <td>
-          <img src="./readme/user.webp" width="100%" title="User profile page"  />
+          <img src="./readme/user.webp" width="100%" title="User profile"  />
       </td>
       <td>
-          <img src="./readme/component.webp" width="100%" title="Component page"/>
+          <img src="./readme/component.webp" width="100%" title="Component detail page"/>
       </td>
     </tr>
 </table>
