@@ -5,6 +5,8 @@
 <br/>
 <br />
 
+# 🧬 Atomox ⚛️
+
 **A place to share and discover reusable UI components.**
 
   <a href="https://atomox.vercel.app">Open the website</a>
@@ -52,9 +54,6 @@ You can also sign in and share your own components for others to use.
 - **Give and receive credit** — Creators can link back to the original design inspiration for a component.
 - **Light and dark mode** — Browse comfortably in either theme.
 
-<p align="right"><a href="#top">⬆️ Back to top</a></p>
-
-
 <!-- GETTING STARTED -->
 ## ⚙️ Getting started
 
@@ -71,34 +70,14 @@ You can also sign in and share your own components for others to use.
    npm run dev
    ```
 
-
-<!-- ROADMAP -->
-## 🎯 Roadmap
-
-Proposed features that may or may not be implemented in the future.
-
-- [x] Comments section
-- [ ] User achievements, description & links.
-- [ ] Components from other frameworks (React, Vue, Angular, etc.)
-- [ ] Tailwind autocomplete
-- [x] Verified user role ~~(Its components are published immediately.)~~
-- [x] Licenses or credits for the components
-- [ ] ~~Zoom in/out in components~~
-
-<p align="right"><a href="#top">⬆️ Back to top</a></p>
-
-<!-- LICENSE -->
 ## 📜 License
 
-Distributed under the Apache License 2.0. See [`LICENSE.txt`](https://github.com/cosmoart/atomox/blob/main/LICENCE) for more information.
+Distributed under the Apache License 2.0. See [`LICENSE`](./LICENSE) for details.
 
-<p align="right"><a href="#top">⬆️ Back to top</a></p>
-
-<!-- CONTACT -->
 ## 📩 Contact
 
--   My website - [cosmoart.dev](https://cosmoart.dev)
--   Twitter - [@cosmoart0](https://twitter.com/cosmoart0)
--   Instagram - [@cosmoart0](https://www.instagram.com/cosmoart0/)
+- Website — [cosmoart.dev](https://cosmoart.dev)
+- Twitter — [@cosmoart0](https://twitter.com/cosmoart0)
+- Instagram — [@cosmoart0](https://www.instagram.com/cosmoart0/)
 
 <p align="right"><a href="#top">⬆️ Back to top</a></p>
