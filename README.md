@@ -45,24 +45,17 @@ You can also sign in and share your own components for others to use.
 
 <p align="right"><a href="#top">⬆️ Back to top</a></p>
 
-### 🛠️ Built With
+## ✨ What you can do
 
-List of the frameworks, libraries and tools used to build this project.
-
-* [Clerk](https://clerk.com/) For authentication
-* [Next.js](https://nextjs.org/)
-* [Supabase](https://supabase.com/) For database & storage
-* [React.js](https://reactjs.org/)
-* [shadcn/ui](https://ui.shadcn.com/) For the design system
-* [React Monaco Editor](https://github.com/suren-atoyan/monaco-react) For the code editor
-* [Lucide](https://lucide.dev/) For icons
-* [Vercel](https://vercel.com/) For hosting
-* [Tailwind CSS](https://tailwindcss.com/) For styling
-* [Figma](https://www.figma.com/) For layouts and design
-* [Canvas confetti](https://www.npmjs.com/package/canvas-confetti) For the confetti animation
-* [React Hook Form](https://react-hook-form.com/) For form validation
-* [Zod](https://zod.dev/) For form validation
-* [next-themes](https://github.com/pacocoursey/next-themes) For dark mode
+- **Browse components** — Explore a growing library of atoms (small pieces like buttons) and molecules (bigger pieces like full sections), with live previews.
+- **Search and filter** — Find components by keyword, filter by Tailwind CSS or plain CSS, and sort by likes or most recent.
+- **Preview instantly** — Every component renders live so you can see exactly how it behaves before using it.
+- **Copy the code** — Grab the HTML, CSS, and JavaScript for any component in one click.
+- **Create your own** — Use the built-in code editor to build a component, preview it as you type, and submit it to the community.
+- **Like and comment** — Show appreciation for components you like and leave feedback (including replies) on any component page.
+- **Build a profile** — Every user has a profile page showing the components they've published and liked.
+- **Give and receive credit** — Creators can link back to the original design inspiration for a component.
+- **Light and dark mode** — Browse comfortably in either theme.
 
 <p align="right"><a href="#top">⬆️ Back to top</a></p>
 
