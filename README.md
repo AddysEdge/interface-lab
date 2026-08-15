@@ -9,27 +9,10 @@
 
 Atomox is a collaborative platform where developers and designers can share, explore, and give feedback on reusable web components. Built for the [Clerk x Midudev hackathon](https://github.com/midudev/hackaton-clerk-2025), Atomox makes it easy to get feedback and inspire others with your UI creations.
 
-  <a href="https://atomox.vercel.app">View Website</a>
-  ·
-  <a href="https://github.com/cosmoart/atomox/issues/new">Report Bug</a>
-  ·
-  <a href="https://github.com/cosmoart/atomox/issues/new">Request Feature</a>
+  <a href="https://atomox.vercel.app">Open the website</a>
 </div>
 
 
-
-<!-- TABLE OF CONTENTS -->
-<details>
-<summary>Table of contents</summary>
-
-- [About The Project](#about-the-project)
-- [Screenshots](#screenshots)
-- [Built With](#built-with)
-- [Getting Started](#getting-started)
-- [Roadmap](#roadmap)
-- [License](#license)
-- [Contact](#contact)
-</details>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
