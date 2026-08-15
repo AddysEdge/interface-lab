@@ -229,7 +229,7 @@ export default function CreateComponent () {
 					srcDoc={iframeHTML({ html, css, js, useTailwind, elementType, darkMode })}
 					title='preview'
 					className='w-full h-full'
-					sandbox='allow-same-origin allow-scripts'
+					sandbox='allow-scripts'
 				/>
 			</div>
 		</ResizablePanel>
