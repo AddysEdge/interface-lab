@@ -101,7 +101,7 @@ export default function CodeEditor ({ htmlD, cssD, jsD, useTailwind, className =
 					// 	height: `${100 * zoom}%`,
 					// 	transform: `scale(${1 / zoom})`,
 					// }}
-					sandbox="allow-same-origin allow-scripts"
+					sandbox="allow-scripts"
 				/>
 				{/* <button className='absolute top-2 right-2 text-sm text-white bg-zinc-900 rounded-md px-3 py-1' onClick={() => setDarkMode(!darkMode)}>Toggle Dark Mode</button> */}
 			</div>
