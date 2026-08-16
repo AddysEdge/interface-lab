@@ -1,5 +1,5 @@
 export const metadata = {
-	title: 'Terms of Service | Atomox',
+	title: 'Terms of Service | Interface Lab',
 	description: 'Terms of Service',
 }
 
@@ -11,8 +11,8 @@ export default function TermsOfService () {
 			<p className='mb-6'><strong>Last updated:</strong> September 5, 2025</p>
 
 			<p className='mb-6'>
-				Welcome to Atomox.dev (“we”, “our”, or “us”). By using our website, you agree to comply with and be bound by
-				these Terms of Service. If you do not agree, please do not use Atomox.dev.
+				Welcome to Interface Lab (“we”, “our”, or “us”). By using our website, you agree to comply with and be bound by
+				these Terms of Service. If you do not agree, please do not use Interface Lab.
 			</p>
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>1. User Accounts</h2>
@@ -35,18 +35,18 @@ export default function TermsOfService () {
 			<ul className='list-disc list-inside space-y-2 mb-6'>
 				<li>Users may comment components respectfully.</li>
 				<li>Spam, harassment, or disrespectful behavior is not tolerated and may result in account deletion.</li>
-				<li>You must not use Atomox.dev for illegal activities or to infringe on others’ rights.</li>
+				<li>You must not use Interface Lab for illegal activities or to infringe on others’ rights.</li>
 			</ul>
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>4. Platform Changes</h2>
 			<p className='mb-6'>
-				Atomox.dev is still in development. Features, rules, and functionality may change at any time without prior
+				Interface Lab is still in development. Features, rules, and functionality may change at any time without prior
 				notice.
 			</p>
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>5. Intellectual Property</h2>
 			<p className='mb-6'>
-				Atomox.dev itself is open source and licensed under the MIT License. All components submitted by users are
+				Interface Lab itself is open source and licensed under the MIT License. All components submitted by users are
 				also published under the MIT License once approved. By contributing, you grant us the right to host, modify,
 				and distribute your content under this license.
 			</p>
@@ -59,13 +59,13 @@ export default function TermsOfService () {
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>7. Disclaimer</h2>
 			<p className='mb-6'>
-				Atomox.dev is provided “as is” without warranties of any kind. We are not responsible for any damages arising
+				Interface Lab is provided “as is” without warranties of any kind. We are not responsible for any damages arising
 				from your use of the platform.
 			</p>
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>8. Changes to Terms</h2>
 			<p className='mb-6'>
-				We may update these Terms of Service from time to time. Continued use of Atomox.dev after changes constitutes
+				We may update these Terms of Service from time to time. Continued use of Interface Lab after changes constitutes
 				acceptance of the updated terms.
 			</p>
 
