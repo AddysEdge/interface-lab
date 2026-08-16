@@ -1,7 +1,7 @@
 import CreateComponent from './Create'
 
 export const metadata = {
-	title: 'Create | Atomox',
+	title: 'Create | Interface Lab',
 }
 
 export default function Create () {

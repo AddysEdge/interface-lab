@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { rules, recommendations, faqs } from '@/lib/conts';
 
 export const metadata = {
-	title: 'Guidelines | Atomox',
+	title: 'Guidelines | Interface Lab',
 	description: 'Help us maintain a high-quality, safe, and inspiring community by following these guidelines when sharing your components.',
 }
 
