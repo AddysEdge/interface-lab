@@ -10,7 +10,7 @@ const montserrat = Montserrat({
 	subsets: ['latin'],
 })
 
-const description = 'Atomox is a platform for creating and sharing reusable UI components. It allows you to create, share, and discover components based on your own designs and styles.'
+const description = 'Interface Lab is a platform for creating and sharing reusable UI components. It allows you to create, share, and discover components based on your own designs and styles.'
 const image = ''
 
 export default async function RootLayout ({ children }) {
@@ -19,24 +19,24 @@ export default async function RootLayout ({ children }) {
 			<html lang='en' suppressHydrationWarning className='antialiased overflow-x-hidden! scroll-smooth scroll-p-40'>
 				<head>
 					<meta name='google-site-verification' content='2wm0Wr41n0uNEIhnTL57lgiyQOHDn_lHlQnXMTY29zE' />
-					<title>Atomox</title>
+					<title>Interface Lab</title>
 					<meta name='description' content={description} />
 					<meta name='robots' content='index, follow' />
 					<meta name='author' content='Cosmo' />
 					<meta name='description' content={description} />
 
 					{/* <!-- Open Graph --> */}
-					<meta property='og:title' content='Atomox' />
+					<meta property='og:title' content='Interface Lab' />
 					<meta property='og:type' content='website' />
-					<meta property='og:site_name' content='Atomox' />
+					<meta property='og:site_name' content='Interface Lab' />
 					<meta property='og:image' content={image} />
-					<meta property='og:url' content='https://Atomox.dev' />
+					<meta property='og:url' content='https://github.com/AddysEdge/interface-lab' />
 					<meta property='og:description' content={description} />
 
 					{/* <!-- Twitter --> */}
 					<meta name='twitter:card' content='summary_large_image' />
 					<meta name='twitter:creator' content='@Cosmoart0' />
-					<meta name='twitter:title' content='Atomox' />
+					<meta name='twitter:title' content='Interface Lab' />
 					<meta name='twitter:description' content={description} />
 					<meta name='twitter:image' content={image} />
 				</head>
