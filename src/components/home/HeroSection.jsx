@@ -58,7 +58,7 @@ export default function HeroSection () {
 
 					<div className='flex flex-col items-center md:items-start'>
 						<StarOnGitHub />
-						<h1 className='text-7xl font-bold my-2 text-zinc-900 dark:text-white title'>Atomox</h1>
+						<h1 className='text-7xl font-bold my-2 text-zinc-900 dark:text-white title'>Interface Lab</h1>
 					</div>
 				</div>
 				<p className='md:text-[17px] mb-5 max-w-[60ch] text-balance text-center lg:text-left box'>A collaborative platform where developers and designers can share, explore, and give feedback on reusable web components.</p>

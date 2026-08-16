@@ -54,7 +54,7 @@ export default function Header () {
 			<div className="flex items-center gap-3">
 				<Link href="/" className="text-lg text-zinc-900 dark:text-white flex items-center gap-2  pr-3 group active:scale-95 transition-all font-semibold relative">
 					<Logo />
-					<span>Atomox</span>
+					<span>Interface Lab</span>
 				</Link>
 				<div className='hidden md:block'>
 					<NavBar />

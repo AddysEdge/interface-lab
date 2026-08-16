@@ -15,7 +15,7 @@ export default function Footer () {
 
 					<div>
 						<Link href='/'>
-							<p className='font-semibold text-4xl -mt-1'>Atomox</p>
+							<p className='font-semibold text-4xl -mt-1'>Interface Lab</p>
 						</Link>
 						<p className='max-w-md text-sm mt-2'>
 							A collaborative platform where developers and designers can share, explore, and give feedback on reusable web components.
