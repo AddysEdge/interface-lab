@@ -2,14 +2,14 @@
 
 <div align="center">
 
-<a href="https://atomox.vercel.app">
-  <img src="./readme/header.webp" alt="Atomox website preview" />
+<a href="https://github.com/AddysEdge/interface-lab">
+  <img src="./readme/header.webp" alt="Interface Lab website preview" />
 </a>
 
 <br />
 <br />
 
-# 🧬 Atomox ⚛️
+# 🧬 Interface Lab ⚛️
 
 ### A community-driven platform for discovering, building, and sharing reusable UI components.
 
@@ -22,11 +22,11 @@ Built for developers who want to quickly find production-ready UI patterns, prev
 
 ## Overview
 
-Atomox is a full-stack UI component-sharing platform where developers can discover and publish reusable frontend components built with **HTML, CSS, JavaScript, and Tailwind CSS**.
+Interface Lab is a full-stack UI component-sharing platform where developers can discover and publish reusable frontend components built with **HTML, CSS, JavaScript, and Tailwind CSS**.
 
 Instead of rebuilding common interface elements from scratch, developers can browse community-created components, preview them live, copy their source code, and integrate them into their own projects.
 
-Atomox also provides a complete creator workflow with authentication, profiles, component publishing, likes, comments, filtering, and live code previews.
+Interface Lab also provides a complete creator workflow with authentication, profiles, component publishing, likes, comments, filtering, and live code previews.
 
 ---
 
@@ -51,18 +51,18 @@ Atomox also provides a complete creator workflow with authentication, profiles, 
 <table>
   <tr>
     <td>
-      <img src="./readme/home.webp" width="100%" alt="Atomox home page" />
+      <img src="./readme/home.webp" width="100%" alt="Interface Lab home page" />
     </td>
     <td>
-      <img src="./readme/buttons.webp" width="100%" alt="Atomox component browser" />
+      <img src="./readme/buttons.webp" width="100%" alt="Interface Lab component browser" />
     </td>
   </tr>
   <tr>
     <td>
-      <img src="./readme/user.webp" width="100%" alt="Atomox user profile" />
+      <img src="./readme/user.webp" width="100%" alt="Interface Lab user profile" />
     </td>
     <td>
-      <img src="./readme/component.webp" width="100%" alt="Atomox component detail page" />
+      <img src="./readme/component.webp" width="100%" alt="Interface Lab component detail page" />
     </td>
   </tr>
 </table>
@@ -113,7 +113,7 @@ Users can like components, leave comments, reply to discussions, and build a pro
 
 ## 🧩 Component Model
 
-Atomox organizes reusable UI into two main categories:
+Interface Lab organizes reusable UI into two main categories:
 
 ### Atoms
 
@@ -144,8 +144,8 @@ This structure makes it easier to browse components based on their complexity an
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/cosmoart/atomox.git
-cd atomox
+git clone https://github.com/AddysEdge/interface-lab.git
+cd interface-lab
 ```
 
 ### 2. Install dependencies
@@ -180,7 +180,7 @@ Search, filtering, and sorting were added to make the library easier to navigate
 
 ### Community Features
 
-Atomox goes beyond simply displaying code snippets.
+Interface Lab goes beyond simply displaying code snippets.
 
 Supporting user-generated content required designing workflows for:
 
@@ -226,11 +226,10 @@ See [`LICENSE`](./LICENSE) for details.
 
 ### Build once. Share everywhere.
 
-**[Explore Atomox](https://atomox.vercel.app)**
+**[Explore Interface Lab](https://github.com/AddysEdge/interface-lab)**
 
 </div>
 
 <p align="right">
   <a href="#top">⬆️ Back to top</a>
 </p>
-
