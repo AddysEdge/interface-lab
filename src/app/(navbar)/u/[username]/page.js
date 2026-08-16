@@ -19,14 +19,14 @@ export async function generateMetadata ({ params }) {
 	const user = data[0];
 
 	const title = user
-		? `${user?.firstName ?? user.username} ${user?.lastName ?? ''} | Atomox`
-		: 'User not found | Atomox';
+		? `${user?.firstName ?? user.username} ${user?.lastName ?? ''} | Interface Lab`
+		: 'User not found | Interface Lab';
 
 	return {
 		title,
 		description: user
-			? `Atomox profile of ${user?.firstName ?? user.username} ${user?.lastName ?? ''}`
-			: 'Atomox | User not found',
+			? `Interface Lab profile of ${user?.firstName ?? user.username} ${user?.lastName ?? ''}`
+			: 'Interface Lab | User not found',
 	};
 }
 
