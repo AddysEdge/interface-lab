@@ -9,7 +9,7 @@ export default function StarOnGitHub () {
 	useEffect(() => {
 		async function fetchStars () {
 			try {
-				const res = await fetch('https://api.github.com/repos/cosmoart/Atomox')
+				const res = await fetch('https://api.github.com/repos/AddysEdge/interface-lab')
 				const data = await res.json()
 				setStars(data.stargazers_count)
 			} catch (error) {
@@ -22,7 +22,7 @@ export default function StarOnGitHub () {
 
 	return (
 		<a
-			href="https://github.com/cosmoart/Atomox"
+			href="https://github.com/AddysEdge/interface-lab"
 			target="_blank"
 			rel="noopener noreferrer"
 			className='rounded-full text-sm active:scale-95 px-4 py-0.5  gradient1 border-white/10 border group drop-shadow-sm flex gap-1 items-center text-white w-fit group grow-x origin-left'

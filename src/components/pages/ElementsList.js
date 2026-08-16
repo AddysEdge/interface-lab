@@ -72,7 +72,7 @@ export default function ElementsList ({ data, title, description }) {
 			</article>
 
 			<footer className='mt-10 mb-3 2xl:mb-8 text-center'>
-				Don&apos;t see the component you&apos;re looking for? <a href={`https://github.com/cosmoart/Atomox/issues/new?title=New%20Component&body=Component%20Name:%20${title}%0ADescription:%20`}
+				Don&apos;t see the component you&apos;re looking for? <a href={`https://github.com/AddysEdge/interface-lab/issues/new?title=New%20Component&body=Component%20Name:%20${title}%0ADescription:%20`}
 					target='_blank' rel='noopener noreferrer' className='underline'>Submit it here</a>.
 			</footer>
 		</div>

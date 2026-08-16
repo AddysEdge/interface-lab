@@ -29,7 +29,7 @@ export default function CTA () {
 						</h2>
 
 						<p className="text-lg md:text-xl text-blue-100/90 max-w-[80ch] mx-auto md:text-balance leading-relaxed">
-							Atomox is where developers share, discover, and collaborate on amazing web components. Upload your creations and get inspired by the community.
+							Interface Lab is where developers share, discover, and collaborate on amazing web components. Upload your creations and get inspired by the community.
 						</p>
 					</div>
 
@@ -67,7 +67,7 @@ export default function CTA () {
 								Open Source & Free
 							</h3>
 							<p className="text-blue-100 text-balance">
-								Atomox is open source (MIT). Contribute to the codebase,
+								Interface Lab is open source (MIT). Contribute to the codebase,
 								suggest features, or help us build something amazing together.
 							</p>
 						</div>
@@ -77,7 +77,7 @@ export default function CTA () {
 								<Heart className="size-4.5 group-hover/btn:scale-120 text-pink-500 fill-transparent group-hover/btn:fill-pink-500 group-hover/btn:rotate-6 transition-all" />
 								<span>Sponsor</span>
 							</a>
-							<a href="https://github.com/cosmoart/Atomox" target="_blank" rel="noopener noreferrer" className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-all  flex items-center space-x-2 group/btn text-nowrap">
+							<a href="https://github.com/AddysEdge/interface-lab" target="_blank" rel="noopener noreferrer" className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-all  flex items-center space-x-2 group/btn text-nowrap">
 								<Github className="size-4.5 group-hover/btn:scale-120 transition-transform" />
 								<span>Contribute on GitHub</span>
 							</a>
