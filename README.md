@@ -15,7 +15,6 @@
 
 Built for developers who want to quickly find production-ready UI patterns, preview them live, copy the source code, or publish their own components.
 
-**[View Live App](https://atomox.vercel.app)**
 
 </div>
 
