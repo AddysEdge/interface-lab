@@ -6,8 +6,8 @@ export async function generateMetadata ({ params }) {
 	const ato = Atoms.find(el => el.id === atom)
 
 	return {
-		title: `${ato.name} | Atomox`,
-		description: `Atomox ${ato.name} component`
+		title: `${ato.name} | Interface Lab`,
+		description: `Interface Lab ${ato.name} component`
 	}
 }
 

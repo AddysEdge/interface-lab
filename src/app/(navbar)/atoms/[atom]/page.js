@@ -14,7 +14,7 @@ export async function generateMetadata ({ params }) {
 	if (!atom || !data) return null;
 
 	return {
-		title: `${data.name} | Atomox`,
+		title: `${data.name} | Interface Lab`,
 		description: data.description
 	};
 }
