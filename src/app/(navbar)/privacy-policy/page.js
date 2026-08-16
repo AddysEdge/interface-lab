@@ -1,5 +1,5 @@
 export const metadata = {
-	title: 'Privacy Policy | Atomox',
+	title: 'Privacy Policy | Interface Lab',
 	description: 'Privacy Policy',
 }
 
@@ -11,14 +11,14 @@ export default function PrivacyPolicy () {
 			<p className='mb-6'><strong>Last updated:</strong> September 5, 2025</p>
 
 			<p className='mb-6'>
-				Atomox.dev (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy. This Privacy Policy explains how we
+				Interface Lab (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy. This Privacy Policy explains how we
 				collect, use, and protect your personal information when you use our website.
 			</p>
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>1. Information We Collect</h2>
 			<ul className='list-disc list-inside space-y-2'>
 				<li><strong>Account Information:</strong> When you register using Clerk, we collect your name, email address, and profile information.</li>
-				<li><strong>User Content:</strong> Components or other content you upload and share on Atomox.dev.</li>
+				<li><strong>User Content:</strong> Components or other content you upload and share on Interface Lab.</li>
 				<li><strong>Analytics Data:</strong> We use Google Analytics to understand site usage (e.g., page views, device type, and general location).</li>
 				<li><strong>Technical Data:</strong> Vercel and Cloudflare may automatically log IP addresses and other technical details for security and performance.</li>
 			</ul>
@@ -62,7 +62,7 @@ export default function PrivacyPolicy () {
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>7. Children&apos;s Privacy</h2>
 			<p className='mb-6'>
-				Atomox.dev is not intended for children under 13. We do not knowingly collect personal data from children.
+				Interface Lab is not intended for children under 13. We do not knowingly collect personal data from children.
 			</p>
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>8. Changes to This Policy</h2>
