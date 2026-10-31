@@ -2,7 +2,7 @@ import { Shield, Code, Users, AlertTriangle, Star, Zap, FileText, Globe, Accessi
 import { atomsIcons, moleculesIcons } from './icons'
 import { atomsCode, moleculesCode } from './exampleCode'
 
-export const verifiedUsers = ['user_2xViHHL26Y03wAoBvi17YJqlBNK']
+export const verifiedUsers = []
 
 export const editorOptions = {
 	wordWrap: 'on',

@@ -2,13 +2,6 @@
 
 <div align="center">
 
-<a href="https://github.com/AddysEdge/interface-lab">
-  <img src="./readme/header.webp" alt="Interface Lab website preview" />
-</a>
-
-<br />
-<br />
-
 # 🧬 Interface Lab ⚛️
 
 ### A community-driven platform for discovering, building, and sharing reusable UI components.
@@ -43,29 +36,6 @@ Interface Lab also provides a complete creator workflow with authentication, pro
 * **Likes & Comments** — Interact with components through likes, comments, and threaded replies.
 * **Creator Attribution** — Link components back to their original design inspiration.
 * **Light & Dark Mode** — Full theme support throughout the application.
-
----
-
-## 📸 Preview
-
-<table>
-  <tr>
-    <td>
-      <img src="./readme/home.webp" width="100%" alt="Interface Lab home page" />
-    </td>
-    <td>
-      <img src="./readme/buttons.webp" width="100%" alt="Interface Lab component browser" />
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <img src="./readme/user.webp" width="100%" alt="Interface Lab user profile" />
-    </td>
-    <td>
-      <img src="./readme/component.webp" width="100%" alt="Interface Lab component detail page" />
-    </td>
-  </tr>
-</table>
 
 ---
 
@@ -154,7 +124,22 @@ cd interface-lab
 npm install
 ```
 
-### 3. Start the development server
+### 3. Configure your services
+
+Create a gitignored `.env.local` with your own Clerk and Supabase configuration:
+
+```dotenv
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_KEY=
+```
+
+For component screenshots hosted on your own storage, also set `COMPONENT_IMAGE_HOST`
+to the HTTPS hostname only (without `https://` or a path). Clerk avatars are allowed
+by default.
+
+### 4. Start the development server
 
 ```bash
 npm run dev

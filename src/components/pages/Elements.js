@@ -44,13 +44,6 @@ export default function Elements ({ data: data2, type }) {
 
 			if (res.error) throw new Error('Error fetching')
 
-			if (res.data.length > (type === 'Atoms' ? 4 : 3)) {
-				const min = type === 'Atoms' ? 4 : 3;
-				const max = res.data.length;
-				const randomIndex = Math.floor(Math.random() * (max - min)) + min;
-				res.data.splice(randomIndex, 0, 'ad');
-			}
-
 			setElements(res.error ? ({ error: res.error }) : res.data);
 			setTotalElements(res.totalCount);
 		} catch (error) {

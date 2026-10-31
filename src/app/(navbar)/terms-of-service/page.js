@@ -8,7 +8,7 @@ export default function TermsOfService () {
 		<div className='section max-w-3xl mx-auto py-12 text-gray-800 dark:text-gray-200'>
 			<h1 className='text-4xl font-bold mb-8'>Terms of Service</h1>
 
-			<p className='mb-6'><strong>Last updated:</strong> September 5, 2025</p>
+			<p className='mb-6'><strong>Last updated:</strong> October 31, 2026</p>
 
 			<p className='mb-6'>
 				Welcome to Interface Lab (“we”, “our”, or “us”). By using our website, you agree to comply with and be bound by
@@ -46,8 +46,8 @@ export default function TermsOfService () {
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>5. Intellectual Property</h2>
 			<p className='mb-6'>
-				Interface Lab itself is open source and licensed under the MIT License. All components submitted by users are
-				also published under the MIT License once approved. By contributing, you grant us the right to host, modify,
+				The platform source code is covered by the license in the repository&apos;s LICENSE file. User-submitted
+				components are published under the MIT License once approved. By contributing, you grant us the right to host, modify,
 				and distribute your content under this license.
 			</p>
 
@@ -71,9 +71,9 @@ export default function TermsOfService () {
 
 			<h2 className='text-2xl font-semibold mt-10 mb-4'>9. Contact Us</h2>
 			<p>
-				If you have any questions about these Terms of Service, please contact us at: <br />
-				<a href='mailto:cosmohydra17@gmail.com' className='text-blue-600 dark:text-blue-400'>
-					cosmohydra17@gmail.com
+				For questions about these Terms of Service, use the contact links on the{' '}
+				<a href='https://github.com/AddysEdge' className='text-blue-600 dark:text-blue-400'>
+					project maintainer&apos;s GitHub profile
 				</a>
 			</p>
 		</div>

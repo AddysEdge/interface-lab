@@ -6,10 +6,8 @@ import { Atoms } from '@/lib/conts';
 import Image from 'next/image';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import ElementDelete from './ElementDelete';
-import Ad from './Ad';
 
 export default function ElementCard ({ data }) {
-	if (data === "ad") return <Ad />
 
 	function isNewElement () {
 		const createdAt = new Date(data.created_at);

@@ -11,7 +11,6 @@ import Image from 'next/image';
 import componentsIcon from '@/assets/icons/components.svg'
 import { Atoms } from '@/lib/conts';
 import Comments from '../Comments';
-import Ad from '../Ad';
 
 export default async function Element ({ id, elementId }) {
 	const element = await getElement(id, elementId)
@@ -106,7 +105,6 @@ export default async function Element ({ id, elementId }) {
 
 			<div className='flex flex-col-reverse gap-10 md:flex-row mt-3 section justify-center'>
 				<Comments id={element.id} />
-				<Ad className='aspect-video md:w-1/3 grow' />
 			</div>
 		</div>
 	)

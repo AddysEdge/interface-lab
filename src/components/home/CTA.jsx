@@ -1,4 +1,4 @@
-import { ArrowRight, Code, Github, Heart, Plus, Sparkles, Upload, Users } from 'lucide-react';
+import { ArrowRight, Github, Plus, Users } from 'lucide-react';
 // import BubbleIconsBackground from './Anima';
 import AnimatedIconsBackground from './Anima';
 import Link from 'next/link';
@@ -67,16 +67,12 @@ export default function CTA () {
 								Open Source & Free
 							</h3>
 							<p className="text-blue-100 text-balance">
-								Interface Lab is open source (MIT). Contribute to the codebase,
-								suggest features, or help us build something amazing together.
+								Explore the source code, suggest features, or contribute improvements
+								to Interface Lab on GitHub.
 							</p>
 						</div>
 
 						<div className='flex gap-4 items-center'>
-							<a href="https://github.com/sponsors/cosmoart" target="_blank" rel="noopener noreferrer" className="bg-white text-zinc-900 px-5 py-2  rounded-lg font-medium flex items-center space-x-2 group/btn text-nowrap active:scale-95 transition-all">
-								<Heart className="size-4.5 group-hover/btn:scale-120 text-pink-500 fill-transparent group-hover/btn:fill-pink-500 group-hover/btn:rotate-6 transition-all" />
-								<span>Sponsor</span>
-							</a>
 							<a href="https://github.com/AddysEdge/interface-lab" target="_blank" rel="noopener noreferrer" className="bg-gray-800 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-all  flex items-center space-x-2 group/btn text-nowrap">
 								<Github className="size-4.5 group-hover/btn:scale-120 transition-transform" />
 								<span>Contribute on GitHub</span>

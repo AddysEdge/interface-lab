@@ -11,10 +11,10 @@ const nextConfig = {
 				protocol: 'https',
 				hostname: 'img.clerk.com',
 			},
-			{
+			...(process.env.COMPONENT_IMAGE_HOST ? [{
 				protocol: 'https',
-				hostname: 'cdn.atomox.dev',
-			}
+				hostname: process.env.COMPONENT_IMAGE_HOST,
+			}] : [])
 		],
 	},
 }

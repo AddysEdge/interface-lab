@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Atoms, Molecules } from '@/lib/conts'
 import Logo from '@/assets/icons/Logo';
 
-import { ArrowUpRight, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 
 export default function Footer () {
 	return (
@@ -20,12 +20,6 @@ export default function Footer () {
 						<p className='max-w-md text-sm mt-2'>
 							A collaborative platform where developers and designers can share, explore, and give feedback on reusable web components.
 						</p>
-
-						<a href="https://clerk.com/blog/highlights-midudev-clerk-hackathon#4th-place-atomox" target="_blank" rel="noopener noreferrer" className='shining bg-zinc-700 dark:text-zinc-900 dark:bg-white text-white text-xs w-fit py-0.5 mt-2 px-2 flex gap-1 items-center rounded-full tracking-wide font-medium group'>
-							<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 64 64"><path fill="currentColor" d="M33.662 36.217V25.326l-7.674 10.891z" /><path fill="currentColor" d="M32 2C15.432 2 2 15.432 2 32s13.432 30 30 30s30-13.432 30-30S48.568 2 32 2m12 39.586h-4.145V48h-6.193v-6.414H20v-5.348L34.48 16h5.375v20.217H44z" /></svg>
-							Place in the Midudev x Clerk Hackathon
-							<ArrowUpRight size={18} className='w-0 transition-all group-hover:w-4 ' />
-						</a>
 
 						<nav>
 							<ul className='flex gap-5 text-sm underline mt-5'>

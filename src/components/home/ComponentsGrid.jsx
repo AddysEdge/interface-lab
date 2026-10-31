@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useTheme } from 'next-themes'
 import { MonitorCog, MoonIcon, Sun } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ComponentsGrid () {
 	const [activeTab, setActiveTab] = useState('Dashboard');
@@ -107,19 +108,17 @@ export default function ComponentsGrid () {
 			{/* Profile */}
 			<section className='col-span-6 bg-white/30 dark:bg-gray-800/60 card-border transition-all backdrop-blur-sm rounded-xl px-4 py-3 2xl:p-6'>
 				<div className='flex items-center gap-2 mb-4'>
-					<img src='https://avatars.githubusercontent.com/u/81999801?v=4'
-						alt='Profile' className='size-9 rounded-full' />
+					<div aria-hidden='true' className='size-9 rounded-full bg-indigo-600 text-white grid place-items-center text-sm font-semibold'>IL</div>
 					<div>
-						<h3 className='font-semibold'>Cosmoart</h3>
-						<p className='text-sm text-zinc-600 dark:text-gray-400'>Web Developer</p>
+						<h3 className='font-semibold'>Demo creator</h3>
+						<p className='text-sm text-zinc-600 dark:text-gray-400'>Example profile</p>
 					</div>
-					<a href='https://github.com/cosmoart' target='_blank' rel='noopener noreferrer' className='ml-auto bg-indigo-600 hover:bg-indigo-700 px-4 py-1 rounded-full text-sm transition-colors active:scale-95 text-white'>
-						Follow
-					</a>
+					<Link href='/create' className='ml-auto bg-indigo-600 hover:bg-indigo-700 px-4 py-1 rounded-full text-sm transition-colors active:scale-95 text-white'>
+						Create
+					</Link>
 				</div>
 				<div className='flex gap-4 text-sm text-zinc-600 dark:text-gray-400'>
-					<span>169 Following</span>
-					<span>2.3K Followers</span>
+					<span>Profile card preview</span>
 				</div>
 			</section>
 
@@ -127,7 +126,7 @@ export default function ComponentsGrid () {
 			<section className='col-span-2 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-2xl p-4 2xl:p-5 flex justify-center items-center'>
 				<div className='text-center text-white'>
 					<div className='text-2xl font-bold mb-2'>97K</div>
-					<div className='text-sm opacity-90'>Total Users</div>
+					<div className='text-sm opacity-90'>Sample statistic</div>
 				</div>
 			</section>
 

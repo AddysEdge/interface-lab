@@ -3,7 +3,6 @@ import { Montserrat } from 'next/font/google'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import '@/app/globals.css'
 import { unstable_ViewTransition as ViewTransition } from 'react';
-import { GoogleAnalytics } from '@next/third-parties/google';
 
 const montserrat = Montserrat({
 	variable: '--font-montserrat',
@@ -18,12 +17,9 @@ export default async function RootLayout ({ children }) {
 		<ClerkProvider>
 			<html lang='en' suppressHydrationWarning className='antialiased overflow-x-hidden! scroll-smooth scroll-p-40'>
 				<head>
-					<meta name='google-site-verification' content='2wm0Wr41n0uNEIhnTL57lgiyQOHDn_lHlQnXMTY29zE' />
 					<title>Interface Lab</title>
 					<meta name='description' content={description} />
 					<meta name='robots' content='index, follow' />
-					<meta name='author' content='Cosmo' />
-					<meta name='description' content={description} />
 
 					{/* <!-- Open Graph --> */}
 					<meta property='og:title' content='Interface Lab' />
@@ -35,7 +31,6 @@ export default async function RootLayout ({ children }) {
 
 					{/* <!-- Twitter --> */}
 					<meta name='twitter:card' content='summary_large_image' />
-					<meta name='twitter:creator' content='@Cosmoart0' />
 					<meta name='twitter:title' content='Interface Lab' />
 					<meta name='twitter:description' content={description} />
 					<meta name='twitter:image' content={image} />
@@ -47,7 +42,6 @@ export default async function RootLayout ({ children }) {
 							{children}
 						</ThemeProvider>
 					</ViewTransition>
-					<GoogleAnalytics gaId='G-9YTZFK39GW' />
 				</body>
 			</html>
 		</ClerkProvider>
