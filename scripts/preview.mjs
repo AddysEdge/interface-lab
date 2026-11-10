@@ -6,6 +6,8 @@ const target = new URL(process.env.PREVIEW_URL || 'http://127.0.0.1:3000');
 assert(['127.0.0.1', 'localhost'].includes(target.hostname), 'Preview must use a local server');
 await mkdir('artifacts', { recursive: true });
 const browser = await chromium.launch();
+const deadline = setTimeout(() => browser.close(), 45000);
+deadline.unref();
 let page;
 const pageErrors = [];
 try {
@@ -49,10 +51,10 @@ try {
 } catch (error) {
 	if (page) {
 		await page.screenshot({ path: 'artifacts/failure.png', timeout: 5000 }).catch(() => {});
-		await writeFile('artifacts/failure.html', await page.content()).catch(() => {});
 	}
 	await writeFile('artifacts/failure.json', JSON.stringify({ error: error.message, pageErrors }, null, 2));
 	throw error;
 } finally {
+	clearTimeout(deadline);
 	await browser.close();
 }
