@@ -40,7 +40,7 @@ let browser;
 let page;
 let deadline;
 try {
-	browser = await chromium.launch();
+	browser = await chromium.launch({ channel: process.env.PREVIEW_BROWSER_CHANNEL || undefined });
 	deadline = setTimeout(() => browser.close(), 45000);
 	deadline.unref();
 	const context = await browser.newContext({
@@ -70,6 +70,7 @@ try {
 		commit: process.env.GITHUB_SHA || null,
 		homepageSha256: createHash('sha256').update(homepage).digest('hex'),
 		browser: browser.version(),
+		browserChannel: process.env.PREVIEW_BROWSER_CHANNEL || 'chromium',
 		viewport: { width: 1440, height: 960 },
 		checks: ['Server-rendered HTML returned HTTP 200', 'Accessible homepage heading', 'Accessible component-category links'],
 		blockedHosts: [...blockedHosts],

@@ -77,6 +77,11 @@ artifact. It does not test hydration, live middleware, authentication or the dat
 To repeat after `npm run build`, install Chromium with `npx playwright install chromium`,
 then run `npm run preview:check`. The command starts and closes its own static preview server.
 
+CI uses Chrome already installed on the Ubuntu 24.04 runner, selected through
+`PREVIEW_BROWSER_CHANNEL=chrome`, so it does not download another browser.
+Locally, the default remains Playwright's managed Chromium; an installed Chrome
+can also be selected through that environment variable.
+
 The attempted live-runtime check with dummy Clerk configuration
 ([run 42759351466](https://github.com/AddysEdge/interface-lab/actions/runs/42759351466))
 timed out before returning HTML. No authentication control was bypassed to make a

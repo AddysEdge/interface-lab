@@ -14,11 +14,12 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     # Build-only placeholders. This workflow never uses real Clerk/Supabase credentials.
     env:
       NEXT_TELEMETRY_DISABLED: '1'
+      PREVIEW_BROWSER_CHANNEL: 'chrome'
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_YnVpbGQtb25seS5jbGVyay5hY2NvdW50cy5kZXYk'
       CLERK_SECRET_KEY: 'sk_test_ci_placeholder_not_a_key'
       NEXT_PUBLIC_SUPABASE_URL: 'https://example.invalid'
@@ -35,8 +36,6 @@ jobs:
         run: npm run lint
       - name: Production build
         run: npm run build
-      - name: Install the preview browser
-        run: npx playwright install --with-deps chromium
       - name: Check the server-rendered build and capture its preview
         timeout-minutes: 2
         run: npm run preview:check
