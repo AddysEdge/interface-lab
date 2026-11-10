@@ -4,9 +4,11 @@
 
 # 🧬 Interface Lab ⚛️
 
+[![CI](https://github.com/AddysEdge/interface-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/AddysEdge/interface-lab/actions/workflows/ci.yml)
+
 ### A community-driven platform for discovering, building, and sharing reusable UI components.
 
-Built for developers who want to quickly find production-ready UI patterns, preview them live, copy the source code, or publish their own components.
+Built for developers who want to find reusable UI patterns, preview them live, copy the source code, or publish their own components.
 
 
 </div>
@@ -14,6 +16,11 @@ Built for developers who want to quickly find production-ready UI patterns, prev
 ---
 
 ## Overview
+
+**Development prototype.** CI checks linting and production compilation with dummy
+credentials. Live sign-in, publishing and authorization need your own services and
+database policies; see [setup and verification](docs/SETUP.md). A database migration
+and RLS policy set are not yet included.
 
 Interface Lab is a full-stack UI component-sharing platform where developers can discover and publish reusable frontend components built with **HTML, CSS, JavaScript, and Tailwind CSS**.
 
@@ -121,12 +128,16 @@ cd interface-lab
 ### 2. Install dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 3. Configure your services
 
-Create a gitignored `.env.local` with your own Clerk and Supabase configuration:
+Copy `.env.example` to the gitignored `.env.local` and add your own Clerk and
+Supabase configuration. The [setup guide](docs/SETUP.md) explains the remaining
+database and authorization prerequisites.
+
+Required values:
 
 ```dotenv
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=

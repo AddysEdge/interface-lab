@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Build-only placeholders. This workflow never uses real Clerk/Supabase credentials.
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_YnVpbGQtb25seS5jbGVyay5hY2NvdW50cy5kZXYk'
+      CLERK_SECRET_KEY: 'sk_test_ci_placeholder_not_a_key'
+      NEXT_PUBLIC_SUPABASE_URL: 'https://example.invalid'
+      NEXT_PUBLIC_SUPABASE_KEY: 'ci_placeholder_not_a_key'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
