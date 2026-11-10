@@ -37,24 +37,12 @@ jobs:
         run: npm run build
       - name: Install the preview browser
         run: npx playwright install --with-deps chromium
-      - name: Check the homepage and capture a build-only preview
+      - name: Check the server-rendered build and capture its preview
         timeout-minutes: 2
-        run: |
-          npm run start -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/interface-lab.log" 2>&1 &
-          app_pid=$!
-          trap 'kill "$app_pid" 2>/dev/null || true; cat "$RUNNER_TEMP/interface-lab.log"' EXIT
-          ready=false
-          for attempt in $(seq 1 20); do
-            if curl --max-time 2 -fsS http://127.0.0.1:3000/ > /dev/null; then ready=true; break; fi
-            sleep 1
-          done
-          if [ "$ready" != true ]; then exit 1; fi
-          npm run preview:check
+        run: npm run preview:check
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: homepage-preview
-          path: |
-            artifacts/
-            ${{ runner.temp }}/interface-lab.log
+          path: artifacts/
           if-no-files-found: error

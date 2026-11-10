@@ -68,10 +68,16 @@ placeholders, so no production project or paid API is needed for linting and com
 
 ## Build-only homepage preview
 
-CI launches the production build with dummy service configuration and captures the
-homepage with Playwright. It checks the accessible heading and category links, blocks
-off-origin browser requests, and saves a screenshot plus scope/console metadata as the
-`homepage-preview` artifact. This is a UI smoke check, not an authentication or database test.
+CI reads the generated server-rendered homepage and bundled assets from the production
+build, serves them on a temporary loopback port, and captures them with Playwright.
+It checks the accessible heading and category links with JavaScript disabled, blocks
+off-origin requests, and saves a screenshot plus scope metadata as the `homepage-preview`
+artifact. It does not test hydration, live middleware, authentication or the database.
 
-To repeat against a local build, install Chromium with `npx playwright install chromium`,
-start `npm run start`, then run `npm run preview:check` in another terminal.
+To repeat after `npm run build`, install Chromium with `npx playwright install chromium`,
+then run `npm run preview:check`. The command starts and closes its own static preview server.
+
+The attempted live-runtime check with dummy Clerk configuration
+([run 42759351466](https://github.com/AddysEdge/interface-lab/actions/runs/42759351466))
+timed out before returning HTML. No authentication control was bypassed to make a
+preview pass. A configured live-runtime check remains required before deployment.
