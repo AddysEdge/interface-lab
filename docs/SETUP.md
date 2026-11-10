@@ -65,3 +65,13 @@ Before exposing a configured deployment, verify at least:
 
 These live checks have not been established by CI. The workflow uses inert build-only
 placeholders, so no production project or paid API is needed for linting and compilation.
+
+## Build-only homepage preview
+
+CI launches the production build with dummy service configuration and captures the
+homepage with Playwright. It checks the accessible heading and category links, blocks
+off-origin browser requests, and saves a screenshot plus scope/console metadata as the
+`homepage-preview` artifact. This is a UI smoke check, not an authentication or database test.
+
+To repeat against a local build, install Chromium with `npx playwright install chromium`,
+start `npm run start`, then run `npm run preview:check` in another terminal.

@@ -6,7 +6,7 @@ import Molecules from '@/components/home/Molecules';
 
 export default async function Home () {
 	return (
-		<div className='section py-1.5 2xl:py-4' aria-hidden='true'>
+		<div className='section py-1.5 2xl:py-4'>
 			<div className='absolute w-full top-0 h-[calc(100svh+10px)] max-h-[880px] -z-10 left-0 bg-gradient-to-br dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900 from-slate-50 via-indigo-200 to-slate-50 border-b border-white/10 opacity-60 dark:opacity-25'></div>
 
 			<div className='not-dark:opacity-0 transition-opacity absolute inset-0 top-0 overflow-hidden  max-h-[880px] rounded-xl'>

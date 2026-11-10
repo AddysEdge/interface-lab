@@ -35,3 +35,21 @@ jobs:
         run: npm run lint
       - name: Production build
         run: npm run build
+      - name: Install the preview browser
+        run: npx playwright install --with-deps chromium
+      - name: Check the homepage and capture a build-only preview
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 > "$RUNNER_TEMP/interface-lab.log" 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/ > /dev/null; then break; fi
+            sleep 1
+          done
+          npm run preview:check
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: homepage-preview
+          path: artifacts/
+          if-no-files-found: error
