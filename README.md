@@ -22,6 +22,16 @@ credentials. Live sign-in, publishing and authorization need your own services a
 database policies; see [setup and verification](docs/SETUP.md). A database migration
 and RLS policy set are not yet included.
 
+## Homepage build preview
+
+![Server-rendered Interface Lab homepage](docs/assets/homepage.png)
+
+Captured from the generated production build in
+[CI run 42759839034](https://github.com/AddysEdge/interface-lab/actions/runs/42759839034);
+[capture metadata](docs/assets/preview.json) records the source commit and checks.
+The component cards contain sample content. JavaScript, live authentication,
+database operations and publishing were not exercised by this static preview.
+
 Interface Lab is a full-stack UI component-sharing platform where developers can discover and publish reusable frontend components built with **HTML, CSS, JavaScript, and Tailwind CSS**.
 
 Instead of rebuilding common interface elements from scratch, developers can browse community-created components, preview them live, copy their source code, and integrate them into their own projects.

@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-11-10T05:06:19.898Z",
+  "commit": "535ccda57d44b983c5d209e70d0b393cda156456",
+  "homepageSha256": "a77eccbf5b7423ecd8af31955cdbee74238e6550570b09a081e48b401e375ba2",
+  "browser": "158.0.8127.18",
+  "viewport": {
+    "width": 1440,
+    "height": 960
+  },
+  "checks": [
+    "Server-rendered HTML returned HTTP 200",
+    "Accessible homepage heading",
+    "Accessible component-category links"
+  ],
+  "blockedHosts": [],
+  "javaScriptEnabled": false,
+  "scope": "Generated server-rendered homepage and bundled assets only. JavaScript, hydration, live middleware, authentication, database operations and publishing are not tested."
+}
