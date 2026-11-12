@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# 🧬 Interface Lab ⚛️
+# 🧬 InterfaceLab ⚛️
 
 [![CI](https://github.com/AddysEdge/interface-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/AddysEdge/interface-lab/actions/workflows/ci.yml)
 
@@ -24,7 +24,7 @@ and RLS policy set are not yet included.
 
 ## Homepage build preview
 
-![Server-rendered Interface Lab homepage](docs/assets/homepage.png)
+![Server-rendered InterfaceLab homepage](docs/assets/homepage.png)
 
 Captured from the generated production build in
 [CI run 42759839034](https://github.com/AddysEdge/interface-lab/actions/runs/42759839034);
@@ -32,11 +32,11 @@ Captured from the generated production build in
 The component cards contain sample content. JavaScript, live authentication,
 database operations and publishing were not exercised by this static preview.
 
-Interface Lab is a full-stack UI component-sharing platform where developers can discover and publish reusable frontend components built with **HTML, CSS, JavaScript, and Tailwind CSS**.
+InterfaceLab is a full-stack UI component-sharing platform where developers can discover and publish reusable frontend components built with **HTML, CSS, JavaScript, and Tailwind CSS**.
 
 Instead of rebuilding common interface elements from scratch, developers can browse community-created components, preview them live, copy their source code, and integrate them into their own projects.
 
-Interface Lab also provides a complete creator workflow with authentication, profiles, component publishing, likes, comments, filtering, and live code previews.
+InterfaceLab also provides a complete creator workflow with authentication, profiles, component publishing, likes, comments, filtering, and live code previews.
 
 ---
 
@@ -100,7 +100,7 @@ Users can like components, leave comments, reply to discussions, and build a pro
 
 ## 🧩 Component Model
 
-Interface Lab organizes reusable UI into two main categories:
+InterfaceLab organizes reusable UI into two main categories:
 
 ### Atoms
 
@@ -186,7 +186,7 @@ Search, filtering, and sorting were added to make the library easier to navigate
 
 ### Community Features
 
-Interface Lab goes beyond simply displaying code snippets.
+InterfaceLab goes beyond simply displaying code snippets.
 
 Supporting user-generated content required designing workflows for:
 
@@ -232,7 +232,7 @@ See [`LICENSE`](./LICENSE) for details.
 
 ### Build once. Share everywhere.
 
-**[Explore Interface Lab](https://github.com/AddysEdge/interface-lab)**
+**[Explore InterfaceLab](https://github.com/AddysEdge/interface-lab)**
 
 </div>
 
