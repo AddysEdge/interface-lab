@@ -19,13 +19,13 @@ Use Node.js 24 and npm 11.6 or newer.
 npm ci
 npm run login
 npx deepspace auth whoami --json
-npx deepspace app init --json
 npm run dev
 ```
 
-Complete browser OAuth with the account that should own the application. Initialize the
-application once, then commit the server-issued `DEEPSPACE_APP_ID` in `wrangler.toml`.
-The ID is public configuration; authentication credentials and local session files are not.
+The application is registered: its server-issued `DEEPSPACE_APP_ID` is committed in
+`wrangler.toml`. The ID is public configuration; authentication credentials and local session
+files are not. Working against this app requires the owner's account or collaborator access;
+to run a separate copy with its own data, register a new app with `npx deepspace app init --new-id`.
 Never substitute a made-up ID for development or deployment.
 
 See the [SDK documentation](https://docs.deep.space) for account setup and CLI details.
