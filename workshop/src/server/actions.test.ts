@@ -314,6 +314,17 @@ describe('AI review (anthropic/chat-completion mocked)', () => {
     expect(component(id).description).toBe('A rounded call to action') // unchanged until the creator accepts
   })
 
+  it('offers a documentation query even when the model leaves it empty', async () => {
+    const saved = await call<{ id: string }>('saveComponent', ALICE, validComponent)
+    const id = saved.success ? saved.data.id : ''
+    room.integration.mockResolvedValue({
+      success: true,
+      data: { content: [{ type: 'text', text: '{"description":"d","tags":["a1","b2"],"accessibility":[],"docsQuery":""}' }] },
+    })
+    const result = await call<{ review: { docsQuery: string } }>('reviewComponent', ALICE, { id })
+    expect(result).toMatchObject({ success: true, data: { review: { docsQuery: 'accessible buttons html css' } } })
+  })
+
   it('is owner-only', async () => {
     const id = await publishedByAlice()
     expect(await call('reviewComponent', BOB, { id })).toMatchObject({ success: false, code: 'not_found' })

@@ -28,7 +28,7 @@ Respond with ONLY a JSON object, no prose, matching:
 {"description": string (<= 200 chars, plain sentence describing the component),
  "tags": string[] (3-6 short lowercase tags: letters, numbers, spaces, . + # -),
  "accessibility": [{"issue": string (<= 160 chars), "suggestion": string (<= 240 chars)}] (0-5 concrete, code-specific items, e.g. missing labels, low contrast, missing focus styles, non-semantic buttons),
- "docsQuery": string (<= 80 chars, a search query for MDN/W3C/web.dev documentation relevant to the most important improvement)}
+ "docsQuery": string (required, never empty, <= 80 chars, a search query for MDN/W3C/web.dev documentation relevant to the most important improvement)}
 Accessibility items are suggestions for a human to verify, not a compliance certification.`
 
 /** Neutralise anything that could close our delimiter tags. */
@@ -66,6 +66,11 @@ const reviewSchema = z.object({
     ),
   docsQuery: z.string().default('').transform((v) => v.replace(/\s+/g, ' ').trim().slice(0, LIMITS.docsQueryMax)),
 })
+
+/** Used when the model leaves docsQuery empty, so the docs shortcut is always offered. */
+export function fallbackDocsQuery(category: string): string {
+  return `accessible ${categoryLabel(category).toLowerCase()} html css`
+}
 
 /** Pull the assistant text out of an Anthropic Messages response (optionally wrapped). */
 export function extractText(payload: unknown): string {
@@ -120,7 +125,8 @@ export const reviewComponent: ActionHandler<Env> = (ctx) =>
       return fail('integration_failed', 'The review service did not respond. Your component is unchanged; try again in a moment.')
     }
 
-    const review = parseReview(extractText(result.data))
-    if (!review) return fail('bad_response', 'The review came back in an unexpected format. Try again.')
+    const suggestion = parseReview(extractText(result.data))
+    if (!suggestion) return fail('bad_response', 'The review came back in an unexpected format. Try again.')
+    const review = { ...suggestion, docsQuery: suggestion.docsQuery || fallbackDocsQuery(component.data.category) }
     return { success: true, data: { review, model: REVIEW_MODEL } }
   })
