@@ -16,11 +16,14 @@ export default function UserLikes () {
 	const pageSize = 12;
 
 	useEffect(() => {
+		let active = true;
 		startTransition(async () => {
-			const res = await getUserLikes({ page, pageSize });
+			const res = await getUserLikes({ page });
+			if (!active) return;
 			setLikes(res.error ? ({ error: res.error }) : res.data);
-			setTotalPages(Math.ceil(res.totalCount / pageSize));
+			setTotalPages(Math.ceil((res.totalCount ?? 0) / pageSize));
 		});
+		return () => { active = false };
 	}, [page]);
 
 	if (loading || likes === "loading") return <div className="pb-4 mt-5">

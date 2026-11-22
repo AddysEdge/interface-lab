@@ -9,7 +9,11 @@ const compat = new FlatCompat({
 	baseDirectory: __dirname,
 });
 
-const eslintConfig = [...compat.config({
+const eslintConfig = [{
+	// Generated output and dependencies are not source; linting them after a local build is noise.
+	// workshop/ is the separate DeepSpace app with its own ESLint config.
+	ignores: ['.next/**', 'out/**', 'build/**', 'artifacts/**', 'coverage/**', 'node_modules/**', 'test-results/**', 'workshop/**'],
+}, ...compat.config({
 	extends: 'next/core-web-vitals',
 	rules: {
 		'indent': [1, 'tab'],

@@ -36,14 +36,16 @@ export default function CreateComponent () {
 	const handleEditorCSS = (monaco) => disposeEmmetHTMLRef.current = emmetCSS(monaco)
 
 	async function handleSubmit (e) {
+		// Explicit allowlist: only these fields are sent; the server re-validates them.
 		const data = {
-			...e,
-			html: html,
-			css: css,
-			js: js,
-			use_tailwind: useTailwind,
 			element_id: elementId,
-			tags: e.tags.filter(tag => tag.length > 1).join(','),
+			html,
+			css,
+			js,
+			use_tailwind: useTailwind,
+			tags: e.tags,
+			credits_name: e.credits_name,
+			credits_link: e.credits_link,
 		}
 
 		setStatus('loading')
@@ -53,7 +55,7 @@ export default function CreateComponent () {
 			if (response?.error) throw new Error(response.error)
 			setStatus('success')
 			Confetti()
-		} catch (error) {
+		} catch {
 			setStatus('error')
 		}
 	}
@@ -119,7 +121,7 @@ export default function CreateComponent () {
 							className={`rounded-lg p-1 shadow transition group cursor-pointer active:scale-95 ${useTailwind
 								? 'bg-sky-500 text-white'
 								: 'bg-gray-200 dark:bg-gray-800 dark:text-white'
-								}`}
+							}`}
 						>
 							<svg
 								xmlns='http://www.w3.org/2000/svg'

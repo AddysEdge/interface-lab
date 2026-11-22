@@ -85,7 +85,7 @@ export default async function UserProfile ({ params }) {
 							label: nowUser?.id === user.id ? 'Your Components' : 'Components',
 							value: 'elements',
 							content: (
-								<UserElements username={user.username} isAuthor={nowUser?.id === user.id} />
+								<UserElements userId={user.id} isAuthor={nowUser?.id === user.id} />
 							)
 						},
 						{

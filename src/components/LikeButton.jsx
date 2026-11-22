@@ -23,8 +23,9 @@ export default function LikeButton ({ elementId, isLiked, initialLikeCount, with
 
 		startTransition(async () => {
 			try {
-				await toggleLike(elementId);
-			} catch (err) {
+				const res = await toggleLike(elementId);
+				if (res?.error) throw new Error(res.error);
+			} catch {
 				setLiked(previousLiked);
 				setLikeCount(previousCount);
 			}

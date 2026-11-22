@@ -9,7 +9,7 @@ import Image from 'next/image';
 import componentsIcon from '@/assets/icons/components.svg';
 import { XCircle } from 'lucide-react';
 
-export default function UserElements ({ username, isAuthor }) {
+export default function UserElements ({ userId, isAuthor }) {
 	const [elements, setElements] = useState("loading");
 	const [loading, startTransition] = useTransition();
 	const [page, setPage] = useState(1);
@@ -17,12 +17,16 @@ export default function UserElements ({ username, isAuthor }) {
 	const pageSize = 12;
 
 	useEffect(() => {
+		let active = true;
 		startTransition(async () => {
-			const res = await getUserElements(username, page, pageSize);
+			// Profiles query by the stable Clerk user id, not the (renamable) username.
+			const res = await getUserElements(userId, page);
+			if (!active) return;
 			setElements(res.error ? ({ error: res.error }) : res.data);
-			setTotalPages(Math.ceil(res.totalCount / pageSize));
+			setTotalPages(Math.ceil((res.totalCount ?? 0) / pageSize));
 		});
-	}, [page]);
+		return () => { active = false };
+	}, [page, userId]);
 
 	if (loading || elements === "loading") return <div className="pb-4 mt-4">
 		<div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
