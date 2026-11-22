@@ -158,6 +158,11 @@ describe('preview document', () => {
     expect(PREVIEW_CSP).not.toMatch(/https?:/)
   })
 
+  it('clips overflow in non-interactive thumbnails only', () => {
+    expect(buildPreviewDocument({ html: '', css: '', scrollable: false })).toContain('html,body{overflow:hidden}')
+    expect(buildPreviewDocument({ html: '', css: '' })).not.toContain('overflow:hidden')
+  })
+
   it('stops user CSS from closing the style element', () => {
     expect(escapeStyleText('a{}</style><script>alert(1)</script>')).not.toMatch(/<\/style/i)
     const doc = buildPreviewDocument({ html: '<p>x</p>', css: '</STYLE><img src=x onerror=alert(1)>' })

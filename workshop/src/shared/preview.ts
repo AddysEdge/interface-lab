@@ -35,7 +35,11 @@ export function escapeStyleText(css: string): string {
   return css.replace(/<\/(style)/gi, '<\\/$1')
 }
 
-export function buildPreviewDocument({ html, css, dark = false }: { html: string; css: string; dark?: boolean }): string {
+/**
+ * `scrollable: false` is for small, non-interactive thumbnails: overflow is clipped
+ * instead of showing scrollbars inside the card.
+ */
+export function buildPreviewDocument({ html, css, dark = false, scrollable = true }: { html: string; css: string; dark?: boolean; scrollable?: boolean }): string {
   return `<!doctype html>
 <html lang="en"${dark ? ' class="dark"' : ''}>
 <head>
@@ -47,7 +51,7 @@ export function buildPreviewDocument({ html, css, dark = false }: { html: string
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;min-height:100vh;padding:24px;background:${dark ? '#0b0b12' : '#ffffff'};color:${dark ? '#f4f4f5' : '#18181b'}}
-</style>
+${scrollable ? '' : 'html,body{overflow:hidden}\n'}</style>
 <style>${escapeStyleText(css)}</style>
 </head>
 <body>

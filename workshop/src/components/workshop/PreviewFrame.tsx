@@ -21,7 +21,7 @@ function PreviewFrameInner({
   className?: string
   interactive?: boolean
 }) {
-  const srcDoc = useMemo(() => buildPreviewDocument({ html, css, dark }), [html, css, dark])
+  const srcDoc = useMemo(() => buildPreviewDocument({ html, css, dark, scrollable: interactive }), [html, css, dark, interactive])
   return (
     <iframe
       data-testid="component-preview"
