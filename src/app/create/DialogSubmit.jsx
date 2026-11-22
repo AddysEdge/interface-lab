@@ -1,6 +1,5 @@
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import InputMultiTag from './InputMultiTag'
-import { z } from 'zod'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
@@ -9,51 +8,8 @@ import { useUser } from '@clerk/nextjs';
 import { Atoms, Molecules } from '@/lib/conts';
 import { Switch } from '@/components/ui/switch';
 
-const schema = z.object({
-	credits_link: z.string()
-		.transform(val => val === "" ? undefined : val)
-		.optional()
-		.refine(val => val === undefined || val.length >= 5, {
-			message: "Enter a link with at least 5 characters",
-		})
-		.refine(val => val === undefined || /^https?:\/\//.test(val), {
-			message: "Invalid URL",
-		})
-		.refine(val => val === undefined || val.length <= 120, {
-			message: "Maximum 120 characters",
-		}),
-	credits_name: z.string()
-		.transform(val => val === "" ? undefined : val)
-		.optional()
-		.refine(val => val === undefined || val.length >= 3, {
-			message: "Enter a name with at least 3 characters",
-		})
-		.refine(val => val === undefined || val.length <= 20, {
-			message: "Maximum 20 characters",
-		}),
-	tags: z
-		.array(z.string().min(2, "Enter a tag").max(15, "Maximum 15 characters"))
-		.min(2, "Enter at least 2 tags")
-		.max(10, "Maximum 10 tags"),
-}).superRefine((data, ctx) => {
-	const { credits_link, credits_name } = data;
-
-	if (credits_link && !credits_name) {
-		ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			path: ["credits_name"],
-			message: "credits_name is required when credits_link is provided",
-		});
-	}
-
-	if (credits_name && !credits_link) {
-		ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			path: ["credits_link"],
-			message: "credits_link is required when credits_name is provided",
-		});
-	}
-});
+// Shared with the server action (src/lib/validation.js), so both enforce the same rules.
+import { elementMetaSchema as schema } from '@/lib/validation';
 
 export default function DialogSubmit ({ onSubmit, elementId, elementType, status }) {
 	const { handleSubmit, control, register, formState: { errors } } = useForm({ resolver: zodResolver(schema) });

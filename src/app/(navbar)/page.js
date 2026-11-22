@@ -2,7 +2,6 @@ import FeaturesBento from '@/components/home/FeaturesBento';
 import AtomsMolecules from '@/components/home/AtomsMolecules';
 import CTA from '@/components/home/CTA';
 import HeroSection from '@/components/home/HeroSection';
-import Molecules from '@/components/home/Molecules';
 
 export default async function Home () {
 	return (

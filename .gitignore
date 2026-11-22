@@ -45,3 +45,6 @@ next-env.d.ts
 test.html
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Local notes, not part of the project documentation.
+/docs/SUBMISSION.md

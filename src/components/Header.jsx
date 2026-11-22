@@ -143,7 +143,7 @@ export default function Header () {
 								Molecules.slice(0, 4).map(mol => (
 									<li key={mol.id}>
 										<Link
-											href={`/atoms/${mol.id}`}
+											href={`/molecules/${mol.id}`}
 											className='block px-4 py-2.5 rounded-lg bg-zinc-100/80 dark:bg-zinc-800/90 text-sm hover:bg-zinc-200/80 dark:hover:bg-zinc-700/80 transition-colors shadow'
 										>
 											{mol.name}

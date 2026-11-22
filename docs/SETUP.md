@@ -1,5 +1,9 @@
 # Local setup and verification
 
+> This guide covers the earlier Next.js implementation in the repository root.
+> The current InterfaceLab application lives in `workshop/`; see its
+> [development guide](../workshop/README.md).
+
 ## Current scope
 
 Interface Lab contains the Next.js UI, server actions, editor and preview rendering.
@@ -50,9 +54,14 @@ design ownership policies for the token identity used by the integration.
 ```bash
 npm ci
 npm run dev
-npm run lint
+npm run lint      # zero warnings allowed
+npm test          # regression tests with a mocked Supabase builder (no database)
 npm run build
 ```
+
+`npm test` covers publishing validation (field allowlist, limits, attribution), explicit
+unauthenticated errors, persisted comment ids and ownership, pagination/URL state and
+multiword search. It does not exercise a real database or RLS.
 
 Before exposing a configured deployment, verify at least:
 

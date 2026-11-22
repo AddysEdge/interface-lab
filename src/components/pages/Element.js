@@ -104,7 +104,11 @@ export default async function Element ({ id, elementId }) {
 			</div>
 
 			<div className='flex flex-col-reverse gap-10 md:flex-row mt-3 section justify-center'>
-				<Comments id={element.id} />
+				{element.published
+					? <Comments id={element.id} />
+					: <p className='w-full max-w-[70ch] rounded-lg card-border px-4 py-3 text-sm'>
+						This component is awaiting review and is only visible to you. Comments open once it is published.
+					</p>}
 			</div>
 		</div>
 	)

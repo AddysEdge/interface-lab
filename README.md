@@ -1,241 +1,142 @@
-<div id="top"></div>
+﻿<div id="top"></div>
 
 <div align="center">
 
-# 🧬 InterfaceLab ⚛️
+# InterfaceLab
 
 [![CI](https://github.com/AddysEdge/interface-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/AddysEdge/interface-lab/actions/workflows/ci.yml)
 
-### A community-driven platform for discovering, building, and sharing reusable UI components.
+### Discover, build, review, and share reusable UI components.
 
-Built for developers who want to find reusable UI patterns, preview them live, copy the source code, or publish their own components.
-
+A community platform for developers to explore UI patterns, create HTML/CSS components,
+preview them safely, copy source code, and improve designs through feedback.
 
 </div>
 
----
+## What you can do
 
-## Overview
+- **Discover components:** browse a library with category filters, multiword search, sorting,
+  and pagination. Included examples are marked **Sample**.
+- **Create and preview:** write HTML, CSS and optional JavaScript with an isolated live preview.
+- **Save private drafts:** return to work in progress, then publish when it is ready to share.
+- **Share and reuse:** open a component's shareable page and copy its HTML or CSS.
+- **Discuss improvements:** leave feedback and replies that update in real time.
+- **Get creator assistance:** request suggested descriptions, tags, and accessibility improvements;
+  choose which suggestions to apply and find supporting technical documentation.
+- **Follow feedback:** opt into email notifications when someone comments on your components.
 
-**Development prototype.** CI checks linting and production compilation with dummy
-credentials. Live sign-in, publishing and authorization need your own services and
-database policies; see [setup and verification](docs/SETUP.md). A database migration
-and RLS policy set are not yet included.
+The core workflow is **browse -> create -> preview -> save -> publish -> discuss**.
+Creators manage their own components, and feedback authors manage their own posts.
 
-## Homepage build preview
+## Repository layout
 
-![Server-rendered InterfaceLab homepage](docs/assets/homepage.png)
+InterfaceLab has evolved from its original Next.js implementation. Both implementations
+remain in this repository, with separate dependencies and backend configuration.
 
-Captured from the generated production build in
-[CI run 42759839034](https://github.com/AddysEdge/interface-lab/actions/runs/42759839034);
-[capture metadata](docs/assets/preview.json) records the source commit and checks.
-The component cards contain sample content. JavaScript, live authentication,
-database operations and publishing were not exercised by this static preview.
+| Location | Purpose |
+|---|---|
+| [`workshop/`](workshop/) | Current React/TypeScript application and worker backend |
+| [`src/`](src/) | Earlier Next.js application using Clerk and Supabase |
+| [`docs/VERIFICATION_CHECKLIST.md`](docs/VERIFICATION_CHECKLIST.md) | Manual release checks |
+| [`docs/SETUP.md`](docs/SETUP.md) | Setup for the earlier Next.js implementation |
 
-InterfaceLab is a full-stack UI component-sharing platform where developers can discover and publish reusable frontend components built with **HTML, CSS, JavaScript, and Tailwind CSS**.
+Use `workshop/` for the current application. Its [development guide](workshop/README.md)
+contains backend setup, testing, and deployment instructions.
 
-Instead of rebuilding common interface elements from scratch, developers can browse community-created components, preview them live, copy their source code, and integrate them into their own projects.
+## Run locally
 
-InterfaceLab also provides a complete creator workflow with authentication, profiles, component publishing, likes, comments, filtering, and live code previews.
-
----
-
-## ✨ Key Features
-
-* **Component Library** — Browse reusable buttons, cards, forms, sections, and other UI patterns.
-* **Live Preview** — View components rendered directly in the browser before using them.
-* **Code Copying** — Copy HTML, CSS, and JavaScript source code directly from a component page.
-* **Component Creator** — Build components using an integrated editor with real-time preview.
-* **Search & Filtering** — Search by keyword and filter components by styling approach.
-* **Sorting** — Discover components by popularity or recency.
-* **Authentication** — Sign in to publish and interact with community content.
-* **User Profiles** — View components created and liked by each user.
-* **Likes & Comments** — Interact with components through likes, comments, and threaded replies.
-* **Creator Attribution** — Link components back to their original design inspiration.
-* **Light & Dark Mode** — Full theme support throughout the application.
-
----
-
-## 🧠 How It Works
-
-### 1. Discover
-
-Users can browse the component library and search for UI elements that fit their project.
-
-### 2. Preview
-
-Every component can be rendered directly in the application so developers can inspect its appearance and behavior before using it.
-
-### 3. Copy
-
-Developers can access the component's HTML, CSS, and JavaScript and reuse it in their own applications.
-
-### 4. Create
-
-Authenticated users can build components through the built-in editor and preview their changes in real time.
-
-### 5. Publish
-
-Completed components can be submitted to the platform and made available to the rest of the community.
-
-### 6. Interact
-
-Users can like components, leave comments, reply to discussions, and build a profile around their contributions.
-
----
-
-## 🛠️ Technical Highlights
-
-* Built a reusable **component discovery and publishing workflow**.
-* Implemented **live component rendering** so users can preview frontend code directly inside the application.
-* Developed a **browser-based code editor** for creating and testing components.
-* Implemented **search, filtering, and sorting** for component discovery.
-* Built **authentication and user profile functionality**.
-* Added **likes, comments, and nested replies** to support community interaction.
-* Designed support for both **Tailwind CSS and traditional CSS components**.
-* Implemented **light and dark themes** across the application.
-* Created a responsive interface for browsing and viewing reusable UI components.
-
----
-
-## 🧩 Component Model
-
-InterfaceLab organizes reusable UI into two main categories:
-
-### Atoms
-
-Small, reusable interface elements such as:
-
-* Buttons
-* Inputs
-* Badges
-* Loaders
-* Icons
-
-### Molecules
-
-Larger UI patterns composed of multiple elements, such as:
-
-* Forms
-* Navigation sections
-* Cards
-* Hero sections
-* Content blocks
-
-This structure makes it easier to browse components based on their complexity and intended use.
-
----
-
-## ⚙️ Getting Started
-
-### 1. Clone the repository
+Use Node.js 24 and npm 11.6 or newer.
 
 ```bash
-git clone https://github.com/AddysEdge/interface-lab.git
-cd interface-lab
-```
-
-### 2. Install dependencies
-
-```bash
+cd workshop
 npm ci
-```
-
-### 3. Configure your services
-
-Copy `.env.example` to the gitignored `.env.local` and add your own Clerk and
-Supabase configuration. The [setup guide](docs/SETUP.md) explains the remaining
-database and authorization prerequisites.
-
-Required values:
-
-```dotenv
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_KEY=
-```
-
-For component screenshots hosted on your own storage, also set `COMPONENT_IMAGE_HOST`
-to the HTTPS hostname only (without `https://` or a path). Clerk avatars are allowed
-by default.
-
-### 4. Start the development server
-
-```bash
+npm run login
+# The registered application ID is committed in workshop/wrangler.toml.
 npm run dev
 ```
 
-Open the local development URL shown in your terminal.
+The backend needs an authenticated developer account and a registered application ID.
+Authentication, persistence, and integrations use the configured platform services.
 
----
+**Live app:** [interfacelab.app.space](https://interfacelab.app.space). Automated end-to-end,
+health and isolation checks pass against the deployed backend; the manual
+[release checklist](docs/VERIFICATION_CHECKLIST.md) is still to be completed.
 
-## 💡 Engineering Challenges
+## How it works
 
-### Live Code Rendering
+The frontend uses React, TypeScript, Vite, and Tailwind CSS. A Hono worker handles authenticated
+server actions, input validation, integrations, and delivery of the application. Schema-backed
+records provide persistent storage, ownership rules, and real-time subscriptions.
 
-One of the main technical challenges was allowing user-provided frontend code to be previewed dynamically while maintaining a usable development experience.
+| Creator tool | Purpose |
+|---|---|
+| AI component review | Suggest descriptions, tags, and potential accessibility improvements for a creator to review |
+| Documentation search | Find reference pages from MDN, W3C, web.dev, WebAIM, A11Y Project, and CSS-Tricks |
+| Feedback notifications | Email an opted-in creator when another user leaves feedback |
 
-The preview system needed to update as users edited their components and correctly render HTML, CSS, and JavaScript together.
+Integration requests run on the server with usage limits. External service failures should
+leave the editor and publishing workflow usable. AI accessibility feedback is guidance for
+human review, not a compliance certification.
 
-### Component Discovery
+## Access and preview isolation
 
-As the component library grows, users need an efficient way to find useful UI elements.
+- Published components are public; drafts are private to their creator.
+- Component and feedback writes go through validated server actions with ownership checks.
+- Identity and privileged fields come from trusted server context.
+- Preview frames are sandboxed with no same-origin access. Their content security policy
+  blocks remote subresources and network APIs. Component JavaScript is off by default and runs
+  only when explicitly enabled. It cannot access the host page, cookies, or storage, open popups
+  or dialogs, or navigate the top window. A script can initiate navigation of its own frame;
+  the load handler then resets the preview with scripts off. Library thumbnails never run scripts.
+- Feedback follows its component's visibility. Unpublishing hides feedback before the component
+  becomes private; if a step fails, the component stays published or its feedback stays hidden,
+  never exposed, and retrying finishes the change. Feedback submitted during an unpublish is
+  withdrawn.
+- The app makes at most one email-send request per feedback item, including concurrent or
+  retried posts. Failed or interrupted sends are not retried, so a notification can be missed.
+  Provider acceptance and inbox delivery are separate; the app does not claim exactly-once delivery.
+- Feedback can be removed by its author, by the creator of the component it is on, or by the app
+  owner.
+- Creators publish directly; the app owner can hide any component from the library (its creator
+  keeps the draft but cannot republish it until it is restored) and remove any feedback from the
+  **Moderation** page.
 
-Search, filtering, and sorting were added to make the library easier to navigate based on keywords, styling approach, popularity, and recency.
+## Verification
 
-### Community Features
+Run checks from `workshop/`:
 
-InterfaceLab goes beyond simply displaying code snippets.
+```bash
+npm run lint
+npm run type-check
+npm run test:unit
+npm run test:isolation
+npm run test:workshop
+npm run build
+npm audit --omit=dev
+```
 
-Supporting user-generated content required designing workflows for:
+Unit tests cover shared logic, permission rules, and server actions using a test record store
+and mocked external integrations. Browser tests cover preview isolation. The two-user suite
+requires a configured backend and test accounts; a skipped suite is not a verified product flow.
+Unit tests and the production build currently require a registered application ID.
 
-* Authentication
-* Publishing
-* Profiles
-* Likes
-* Comments
-* Replies
-* Attribution
+Before a release, complete the [manual checklist](docs/VERIFICATION_CHECKLIST.md), including
+persistence, ownership restrictions, publishing, feedback, and real integration calls.
 
-### Responsive UI
+## Current boundaries
 
-Because the application itself is focused on frontend development, maintaining a polished and responsive interface across different screen sizes was an important part of the project.
+- The editor uses textareas with Tab-to-indent. The earlier Tailwind preview is available only
+  in the original implementation.
+- Search runs on the server over every published component and returns one page at a time.
+  Responses are not cached so unpublished code disappears from subsequent requests, including
+  requests using an old library version. A very large catalog would benefit from a dedicated
+  search index.
+- Moderation is performed by the app owner; there are no additional moderator roles.
+- The original Supabase implementation still needs database migrations and access policies;
+  see its [setup guide](docs/SETUP.md).
 
----
+## License
 
-## 🚀 Future Improvements
+Distributed under the **Apache License 2.0**. See [`LICENSE`](LICENSE).
 
-* Add more advanced component categories and tags
-* Improve component search and ranking
-* Add component collections and bookmarks
-* Support additional frontend frameworks
-* Add stronger validation for submitted code
-* Improve preview isolation and sandboxing
-* Add automated component moderation
-* Add versioning for published components
-* Improve accessibility metadata
-* Add automated testing for user-submitted components
-* Expand creator analytics and profile statistics
-
----
-
-## 📜 License
-
-Distributed under the **Apache License 2.0**.
-
-See [`LICENSE`](./LICENSE) for details.
-
----
-
-<div align="center">
-
-### Build once. Share everywhere.
-
-**[Explore InterfaceLab](https://github.com/AddysEdge/interface-lab)**
-
-</div>
-
-<p align="right">
-  <a href="#top">⬆️ Back to top</a>
-</p>
+<p align="right"><a href="#top">Back to top</a></p>

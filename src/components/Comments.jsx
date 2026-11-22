@@ -7,6 +7,7 @@ import { useTheme } from 'next-themes';
 import { dark } from '@clerk/themes';
 import { EllipsisVertical, Heart, OctagonAlert, SendHorizontal, Trash } from 'lucide-react';
 import { createComment, deleteComment, getComments, likeComment } from '@/lib/actions';
+import { addComment, canDeleteComment, canReplyTo, createTempId, removeComment, replaceComment, restoreComment } from '@/lib/commentState';
 import { getTimeAgo } from '@/lib/getTimeAgo';
 import Link from 'next/link';
 import { MagicMotion } from 'react-magic-motion';
@@ -18,18 +19,22 @@ export default function Comments ({ id }) {
 	const { user } = useUser()
 
 	useEffect(() => {
-		getAllComments()
-	}, []);
+		let active = true
+		getComments(id)
+			.then((res) => {
+				if (active) setComments(res?.error || !Array.isArray(res?.data) ? 'error' : res.data)
+			})
+			.catch(() => active && setComments('error'))
+		return () => { active = false }
+	}, [id]);
 
 	async function getAllComments () {
 		setComments("loading")
 		try {
 			const res = await getComments(id)
-			console.log(res);
-
-			if (res?.error) throw new Error('Error while fetching comments')
-			setComments(res)
-		} catch (error) {
+			if (res?.error || !Array.isArray(res?.data)) throw new Error('Error while fetching comments')
+			setComments(res.data)
+		} catch {
 			setComments("error")
 		}
 	}
@@ -38,46 +43,48 @@ export default function Comments ({ id }) {
 		e.preventDefault()
 		if (typeof comments !== "object" || !user) return
 
-		const formData = new FormData(e.target)
-		const comment = formData.get('comment').trim()
+		const form = e.currentTarget
+		const comment = new FormData(form).get('comment')?.toString().trim()
 		if (!comment) return
 
-		const tempId = Date.now()
-		setComments((prev) => [...prev, {
+		// A "temp-" id can never collide with a persisted (numeric) comment id.
+		const tempId = createTempId()
+		setComments((prev) => addComment(prev, {
 			id: tempId,
-			user: user.firstName + (user.lastName ? ' ' + user.lastName : ''),
+			user: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.username,
 			content: comment,
 			avatar: user.imageUrl,
 			username: user.username,
+			user_id: user.id,
 			element_id: id,
-			parent_id: replyTo,
-			created_at: new Date(),
+			parent_id: replyTo ?? null,
+			created_at: new Date().toISOString(),
 			creating: true
-		}])
+		}))
+		form.reset()
 
 		try {
-			const res = await createComment({ comment, element_id: id, parent_id: replyTo })
-			if (res?.error) throw new Error('Error creating comment')
-			setComments((comments) =>
-				comments.map((c) => c.id === tempId ? { ...c, creating: false } : c)
-			)
+			const res = await createComment({ comment, element_id: id, parent_id: replyTo ?? null })
+			if (res?.error || !res?.data) throw new Error(res?.error ?? 'Error creating comment')
+			// Swap in the persisted row so it can be replied to or deleted immediately.
+			setComments((prev) => replaceComment(prev, tempId, res.data))
 		} catch (error) {
-			toast.error('Error creating comment')
-			setComments((prev) => prev.filter((c) => c.id !== tempId))
-		} finally {
-			e.target.reset()
+			toast.error(error?.message || 'Error creating comment')
+			setComments((prev) => removeComment(prev, tempId))
+			if (form.isConnected && form.comment) form.comment.value = comment
 		}
 	}
 
-	async function deleteIdComment (id) {
-		const oldComments = comments
-		setComments((comments) => [...comments.filter(comment => comment.id !== id)])
+	async function deleteIdComment (commentId) {
+		const removed = comments.find(comment => comment.id === commentId)
+		if (!removed) return
+		setComments((prev) => removeComment(prev, commentId))
 		try {
-			const res = await deleteComment(id)
-			if (res?.error) throw new Error('Error deleting comment')
+			const res = await deleteComment(commentId)
+			if (res?.error) throw new Error(res.error)
 		} catch (error) {
-			setComments(oldComments)
-			toast.error('Error deleting comment')
+			setComments((prev) => restoreComment(prev, removed))
+			toast.error(error?.message || 'Error deleting comment')
 		}
 	}
 
@@ -178,7 +185,7 @@ export default function Comments ({ id }) {
 
 									<CommentCard
 										comment={comment}
-										username={user?.username}
+										userId={user?.id}
 										deleteComment={deleteIdComment}
 										likeComment={likeIdComment}
 										onReply={() => replyTo === comment.id ? setReplyTo(null) : setReplyTo(comment.id)}
@@ -194,7 +201,7 @@ export default function Comments ({ id }) {
 												<CommentCard
 													key="exclude"
 													comment={reply}
-													username={user?.username}
+													userId={user?.id}
 													deleteComment={deleteIdComment}
 													likeComment={likeIdComment}
 													isReply
@@ -219,7 +226,7 @@ export default function Comments ({ id }) {
 	</article>
 }
 
-function CommentCard ({ comment, username, deleteComment, onReply, isReply = false, likeComment }) {
+function CommentCard ({ comment, userId, deleteComment, onReply, isReply = false, likeComment }) {
 	if (comment.deleted) return <div className='py-2.5 px-4 bg-zinc-200/60 backdrop-blur-2xl card-border shadow dark:bg-zinc-900 rounded-full'>
 		Comment deleted
 	</div>
@@ -239,7 +246,7 @@ function CommentCard ({ comment, username, deleteComment, onReply, isReply = fal
 						{comment.user}
 					</Link>
 					<span className='text-sm opacity-80'>{getTimeAgo(new Date(comment.created_at) ?? new Date())}</span>
-					{username === comment.username && <DropdownMenu modal={false}>
+					{canDeleteComment(comment, userId) && <DropdownMenu modal={false}>
 						<DropdownMenuTrigger asChild>
 							<button variant="ghost" size="icon" className="py-1 ml-auto px-0.5 cursor-pointer active:scale-90 transition-transform">
 								<EllipsisVertical className="size-5" />
@@ -261,7 +268,7 @@ function CommentCard ({ comment, username, deleteComment, onReply, isReply = fal
 						<Heart size={18} className={comment.likedByUser ? 'text-red-500' : ''} />
 						5 Likes
 					</button> */}
-					{!isReply && <button className='text-sm cursor-pointer active:scale-95 transition-transform' onClick={onReply}>Reply</button>}
+					{!isReply && canReplyTo(comment) && <button className='text-sm cursor-pointer active:scale-95 transition-transform' onClick={onReply}>Reply</button>}
 				</div>
 			</div>
 		</div>
