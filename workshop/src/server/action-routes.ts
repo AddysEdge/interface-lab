@@ -64,9 +64,27 @@ export function registerActionRoutes(app: Hono<AppContext>, resolveAuth: Resolve
     if (!action) return c.json({ error: 'Action not found' }, 404)
     const params = await c.req.json<Record<string, unknown>>()
     const tools = createActionTools(c.env, auth.userId, callerJwt)
-    const result = await action({ userId: auth.userId, params, tools, env: c.env, callerJwt })
+    const running = action({ userId: auth.userId, params, tools, env: c.env, callerJwt })
+    keepRunning(c, running)
+    const result = await running
     return c.json(result as unknown as Record<string, unknown>)
   })
+}
+
+/**
+ * Workers cancel a request's remaining work when the client disconnects (a
+ * closed tab, a dropped connection). Actions are multi-step (write, then
+ * recount / sync visibility / notify), so register the running action with
+ * waitUntil: once started, it finishes even if nobody waits for the response.
+ */
+export function keepRunning(c: { executionCtx: { waitUntil(promise: Promise<unknown>): void } }, running: Promise<unknown>): void {
+  let ctx: { waitUntil(promise: Promise<unknown>): void } | undefined
+  try {
+    ctx = c.executionCtx
+  } catch {
+    return // no ExecutionContext (e.g. unit tests); nothing to extend
+  }
+  ctx.waitUntil(running.catch(() => undefined))
 }
 
 function createActionTools(env: Env, userId: string, callerJwt: string): ActionTools {
