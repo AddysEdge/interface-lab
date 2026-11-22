@@ -66,16 +66,15 @@ npm run build
 npm run deploy
 ```
 
-Confirm the intended account, source repository, app name, and registered ID before the first
-deployment. This checkout uses `AddysEdge/interface-lab` as its GitHub origin. The first release
-permanently binds the app's source authority; with a GitHub-backed app, deployment ships the
-working tree, including uncommitted bytes. Commit and push the intended release so reviewers
-and collaborators can reproduce it.
+The app is live at https://interfacelab.app.space. Its source authority is GitHub
+(`AddysEdge/interface-lab`), bound permanently by the first release; a GitHub-backed deploy
+ships the working tree, including uncommitted bytes, so deploy from a clean, pushed commit so
+the release can be reproduced.
 
-The requested hostname is `interfacelab.app.space`, subject to availability. It is not a
-verified live URL yet. After deployment, follow the
-[release checklist](../docs/VERIFICATION_CHECKLIST.md) and check the deployed product with
-separate creator, second-user, and signed-out sessions.
+After each deployment, run `npm run test:deployed` (end-to-end and health specs against the live
+app; override the target with `DEPLOYED_URL`), check `npx deepspace logs`, and follow the
+[release checklist](../docs/VERIFICATION_CHECKLIST.md) with separate creator, second-user, and
+signed-out sessions.
 
 The app owner can load the marked sample library from `/home` after registration.
 

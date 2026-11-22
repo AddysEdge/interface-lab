@@ -58,9 +58,9 @@ npm run dev
 The backend needs an authenticated developer account and a registered application ID.
 Authentication, persistence, and integrations use the configured platform services.
 
-**Release status:** the current checkout still needs application registration, a deployment,
-and verification against the live backend. A public URL will be listed here after it has
-been deployed and checked.
+**Live app:** [interfacelab.app.space](https://interfacelab.app.space). Automated end-to-end,
+health and isolation checks pass against the deployed backend; the manual
+[release checklist](docs/VERIFICATION_CHECKLIST.md) is still to be completed.
 
 ## How it works
 
