@@ -19,5 +19,6 @@ export const nav: NavItem[] = [
   { path: '/home', label: 'Library' },
   { path: '/studio', label: 'My components' },
   { path: '/settings', label: 'Settings' },
+  { path: '/moderation', label: 'Moderation', roles: ['admin'] },
   // ── Features add nav items below this line ──
 ]

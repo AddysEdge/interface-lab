@@ -17,7 +17,7 @@ preview them safely, copy source code, and improve designs through feedback.
 
 - **Discover components:** browse a library with category filters, multiword search, sorting,
   and pagination. Included examples are marked **Sample**.
-- **Create and preview:** write HTML and CSS side by side with an isolated live preview.
+- **Create and preview:** write HTML, CSS and optional JavaScript with an isolated live preview.
 - **Save private drafts:** return to work in progress, then publish when it is ready to share.
 - **Share and reuse:** open a component's shareable page and copy its HTML or CSS.
 - **Discuss improvements:** leave feedback and replies that update in real time.
@@ -83,18 +83,23 @@ human review, not a compliance certification.
 - Published components are public; drafts are private to their creator.
 - Component and feedback writes go through validated server actions with ownership checks.
 - Identity and privileged fields come from trusted server context.
-- Preview frames use an empty sandbox and a restrictive content security policy to isolate
-  untrusted HTML/CSS from the host application.
+- Preview frames are sandboxed with no same-origin access. Their content security policy
+  blocks remote subresources and network APIs. Component JavaScript is off by default and runs
+  only when explicitly enabled. It cannot access the host page, cookies, or storage, open popups
+  or dialogs, or navigate the top window. A script can initiate navigation of its own frame;
+  the load handler then resets the preview with scripts off. Library thumbnails never run scripts.
 - Feedback follows its component's visibility. Unpublishing hides feedback before the component
   becomes private; if a step fails, the component stays published or its feedback stays hidden,
   never exposed, and retrying finishes the change. Feedback submitted during an unpublish is
   withdrawn.
-- Feedback notifications have one sender per feedback item, even when a post is retried or
-  submitted twice at once. An email is never re-sent after its delivery is recorded, and a
-  failed send is retried at most twice more. One gap remains: if the server stops after the
-  email provider accepts a message but before the send is recorded, a later retry can send a
-  duplicate.
-- Creators publish directly. A moderation dashboard is a planned improvement.
+- The app makes at most one email-send request per feedback item, including concurrent or
+  retried posts. Failed or interrupted sends are not retried, so a notification can be missed.
+  Provider acceptance and inbox delivery are separate; the app does not claim exactly-once delivery.
+- Feedback can be removed by its author, by the creator of the component it is on, or by the app
+  owner.
+- Creators publish directly; the app owner can hide any component from the library (its creator
+  keeps the draft but cannot republish it until it is restored) and remove any feedback from the
+  **Moderation** page.
 
 ## Verification
 
@@ -120,12 +125,13 @@ persistence, ownership restrictions, publishing, feedback, and real integration 
 
 ## Current boundaries
 
-- The current editor supports HTML/CSS. JavaScript components and the earlier Tailwind preview
-  are available only in the original implementation.
-- The editor uses textareas with Tab-to-indent.
-- Search runs in the browser over up to 500 published components. Larger libraries need
-  server-side search and pagination.
-- Creators cannot remove other users' feedback, and there is no moderation dashboard yet.
+- The editor uses textareas with Tab-to-indent. The earlier Tailwind preview is available only
+  in the original implementation.
+- Search runs on the server over every published component and returns one page at a time.
+  Responses are not cached so unpublished code disappears from subsequent requests, including
+  requests using an old library version. A very large catalog would benefit from a dedicated
+  search index.
+- Moderation is performed by the app owner; there are no additional moderator roles.
 - The original Supabase implementation still needs database migrations and access policies;
   see its [setup guide](docs/SETUP.md).
 

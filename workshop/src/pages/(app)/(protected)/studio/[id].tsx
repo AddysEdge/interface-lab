@@ -27,6 +27,7 @@ interface Draft {
   tags: string
   html: string
   css: string
+  js: string
 }
 
 const STARTER: Draft = {
@@ -46,6 +47,7 @@ const STARTER: Draft = {
 }
 .btn:hover { background: #4338ca; }
 .btn:focus-visible { outline: 3px solid #a5b4fc; outline-offset: 2px; }`,
+  js: '',
 }
 
 function toDraft(data: ComponentData): Draft {
@@ -56,6 +58,7 @@ function toDraft(data: ComponentData): Draft {
     tags: (data.tags ?? []).join(', '),
     html: data.html ?? '',
     css: data.css ?? '',
+    js: data.js ?? '',
   }
 }
 
@@ -68,6 +71,7 @@ function toParams(draft: Draft, id: string | null) {
     tags: draft.tags.split(',').map((t) => t.trim()).filter(Boolean),
     html: draft.html,
     css: draft.css,
+    js: draft.js,
   }
 }
 
@@ -101,8 +105,9 @@ export default function EditorPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState<null | 'save' | 'publish'>(null)
   const [docsRequest, setDocsRequest] = useState<{ query: string; nonce: number } | null>(null)
-  const [codeTab, setCodeTab] = useState<'html' | 'css'>('html')
+  const [codeTab, setCodeTab] = useState<'html' | 'css' | 'js'>('html')
   const [previewDark, setPreviewDark] = useState(false)
+  const [runScripts, setRunScripts] = useState(false)
 
   // Load the stored component once (later live updates do not overwrite typing).
   useEffect(() => {
@@ -119,6 +124,7 @@ export default function EditorPage() {
   const currentStatus: ComponentStatus = owned?.data.status ?? 'draft'
   const deferredHtml = useDeferredValue(draft.html)
   const deferredCss = useDeferredValue(draft.css)
+  const deferredJs = useDeferredValue(draft.js)
 
   // Warn before leaving with unsaved edits (in-app navigation and tab close).
   const blocker = useBlocker(({ currentLocation, nextLocation }) => dirty && busy === null && currentLocation.pathname !== nextLocation.pathname)
@@ -236,7 +242,7 @@ export default function EditorPage() {
 
           <div className="flex min-h-[360px] flex-col overflow-hidden rounded-xl border border-border bg-card">
             <div className="flex items-center gap-1 border-b border-border p-1.5" role="tablist" aria-label="Code">
-              {(['html', 'css'] as const).map((tab) => (
+              {(['html', 'css', 'js'] as const).map((tab) => (
                 <button key={tab} role="tab" aria-selected={codeTab === tab} onClick={() => setCodeTab(tab)}
                   className={`rounded-md px-3 py-1 text-xs font-semibold uppercase ${codeTab === tab ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                   {tab}
@@ -244,7 +250,7 @@ export default function EditorPage() {
               ))}
               <span className="flex-1" />
               <span className="pr-2 text-xs text-muted-foreground">
-                {(codeTab === 'html' ? draft.html : draft.css).length.toLocaleString('en-US')}/{(codeTab === 'html' ? LIMITS.htmlMax : LIMITS.cssMax).toLocaleString('en-US')}
+                {draft[codeTab].length.toLocaleString('en-US')}/{(codeTab === 'html' ? LIMITS.htmlMax : codeTab === 'css' ? LIMITS.cssMax : LIMITS.jsMax).toLocaleString('en-US')}
               </span>
             </div>
             <textarea
@@ -253,24 +259,41 @@ export default function EditorPage() {
               spellCheck={false}
               autoCapitalize="off"
               autoComplete="off"
-              value={codeTab === 'html' ? draft.html : draft.css}
-              maxLength={codeTab === 'html' ? LIMITS.htmlMax : LIMITS.cssMax}
+              value={draft[codeTab]}
+              maxLength={codeTab === 'html' ? LIMITS.htmlMax : codeTab === 'css' ? LIMITS.cssMax : LIMITS.jsMax}
               onChange={(e) => update(codeTab, e.target.value)}
               onKeyDown={(e) => handleTab(e, (value) => update(codeTab, value))}
               className="code-area min-h-[320px] flex-1 resize-y bg-background p-4 text-foreground outline-none"
             />
-            {(fieldErrors.html || fieldErrors.css) && <p className="px-4 pb-2 text-xs text-destructive">{fieldErrors.html || fieldErrors.css}</p>}
+            {(fieldErrors.html || fieldErrors.css || fieldErrors.js) && <p className="px-4 pb-2 text-xs text-destructive">{fieldErrors.html || fieldErrors.css || fieldErrors.js}</p>}
           </div>
         </div>
 
         <div className="flex min-w-0 flex-col gap-3">
           <section aria-label="Live preview" className="flex min-h-[360px] flex-col overflow-hidden rounded-xl border border-border bg-card">
             <div className="flex items-center justify-between border-b border-border px-3 py-1.5 text-xs text-muted-foreground">
-              <span>Live preview · {categoryLabel(draft.category)} · isolated (no scripts, no network)</span>
-              <button className="hover:text-foreground" onClick={() => setPreviewDark((d) => !d)}>{previewDark ? 'Light' : 'Dark'} background</button>
+              <span>Live preview · {categoryLabel(draft.category)} · isolated (no network{runScripts ? '' : ', scripts off'})</span>
+              <span className="flex items-center gap-3">
+                <label className="flex items-center gap-1.5">
+                  <input type="checkbox" data-testid="editor-run-scripts" checked={runScripts} onChange={(e) => setRunScripts(e.target.checked)} />
+                  Run scripts
+                </label>
+                <button className="hover:text-foreground" onClick={() => setPreviewDark((d) => !d)}>{previewDark ? 'Light' : 'Dark'} background</button>
+              </span>
             </div>
             <div className="min-h-[320px] flex-1">
-              <PreviewFrame html={deferredHtml} css={deferredCss} dark={previewDark} title="Live preview" />
+              <PreviewFrame
+                html={deferredHtml}
+                css={deferredCss}
+                js={deferredJs}
+                runScripts={runScripts}
+                dark={previewDark}
+                title="Live preview"
+                onNavigated={() => {
+                  setRunScripts(false)
+                  error('Scripts stopped', 'The script navigated the preview away, so scripts were turned off.')
+                }}
+              />
             </div>
           </section>
           <ReviewPanel

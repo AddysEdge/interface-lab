@@ -13,7 +13,7 @@ import { LIMITS } from '../shared/limits'
  * Write: no client role may create/update/delete directly. All writes go
  * through server actions (src/server/components.ts), which validate and
  * bound the input, check ownership, and keep authorName, feedbackCount,
- * isSample and publishedAt server-controlled.
+ * isSample, publishedAt and moderation server-controlled.
  */
 const readPublishedOnly: RolePermissions = { read: 'published', create: false, update: false, delete: false }
 
@@ -26,6 +26,7 @@ export const componentsSchema: CollectionSchema = {
     { name: 'tags', storage: 'text', interpretation: { kind: 'json' }, default: [] },
     { name: 'html', storage: 'text', interpretation: 'plain', default: '', maxLength: LIMITS.htmlMax },
     { name: 'css', storage: 'text', interpretation: 'plain', default: '', maxLength: LIMITS.cssMax },
+    { name: 'js', storage: 'text', interpretation: 'plain', default: '', maxLength: LIMITS.jsMax },
     {
       name: 'status',
       storage: 'text',
@@ -38,6 +39,8 @@ export const componentsSchema: CollectionSchema = {
     { name: 'isSample', storage: 'number', interpretation: { kind: 'boolean' }, default: false },
     { name: 'feedbackCount', storage: 'number', interpretation: 'plain', default: 0 },
     { name: 'publishedAt', storage: 'number', interpretation: 'plain', default: 0 },
+    // App-owner moderation; a hidden component stays a draft and cannot be republished.
+    { name: 'moderation', storage: 'text', interpretation: { kind: 'select', options: ['none', 'hidden'] }, default: 'none' },
   ],
   ownerField: 'ownerId',
   visibilityField: { field: 'status', value: 'published' },

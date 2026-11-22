@@ -9,7 +9,10 @@ export interface ComponentData {
   tags: string[]
   html: string
   css: string
+  js: string
   status: ComponentStatus
+  /** Set by the app owner's moderation; a hidden component cannot be republished. */
+  moderation: 'none' | 'hidden'
   ownerId: string
   authorName: string
   isSample: boolean | number
@@ -59,3 +62,4 @@ export type ActionErrorCode =
   | 'bad_response'
   | 'storage_failed'
   | 'visibility_incomplete'
+  | 'moderated'

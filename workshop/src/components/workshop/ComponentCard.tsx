@@ -5,8 +5,15 @@ import { categoryLabel } from '../../shared/categories'
 import type { ComponentData } from '../../shared/types'
 import { PreviewFrame } from './PreviewFrame'
 
-export function ComponentCard({ id, data, href }: { id: string; data: ComponentData; href?: string }) {
+/** What a card needs: a full record (studio) or a search result (library). */
+export type CardData = Pick<ComponentData, 'title' | 'category' | 'authorName' | 'feedbackCount' | 'isSample' | 'status' | 'html' | 'css'> & {
+  js?: string
+  hasScript?: boolean
+}
+
+export function ComponentCard({ id, data, href }: { id: string; data: CardData; href?: string }) {
   const draft = data.status !== 'published'
+  const scripted = Boolean(data.hasScript || data.js?.trim())
   return (
     <article data-testid="component-card" className="group relative overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/60">
       <div className="relative aspect-[16/10] overflow-hidden bg-white">
@@ -20,6 +27,7 @@ export function ComponentCard({ id, data, href }: { id: string; data: ComponentD
             </Link>
           </h3>
           {draft && <Badge variant="warning" size="sm">Draft</Badge>}
+          {scripted && <Badge variant="outline" size="sm">JS</Badge>}
           {Boolean(data.isSample) && <Badge variant="outline" size="sm">Sample</Badge>}
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">

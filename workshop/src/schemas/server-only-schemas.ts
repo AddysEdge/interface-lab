@@ -26,10 +26,26 @@ export const usageSchema: CollectionSchema = {
 }
 
 /**
- * Email notification ledger: one row per send ATTEMPT for a feedback item.
- * uniqueOn(feedbackId, attempt) is the cross-request lock: of any number of
- * concurrent submits/retries, exactly one can create attempt N and send it;
- * the rest see the claim and stand down (see src/server/notify.ts).
+ * One public row ("library") whose `version` changes whenever published library
+ * content changes. Browsers subscribe to it and refetch server-side search
+ * results when it changes. No client can write it.
+ */
+export const libraryMetaSchema: CollectionSchema = {
+  name: 'library_meta',
+  columns: [{ name: 'version', storage: 'text', interpretation: 'plain', default: '', maxLength: 64 }],
+  permissions: {
+    '*': { read: true, create: false, update: false, delete: false },
+    viewer: { read: true, create: false, update: false, delete: false },
+    member: { read: true, create: false, update: false, delete: false },
+    admin: { read: true, create: false, update: false, delete: false },
+  },
+}
+
+/**
+ * Email notification ledger. uniqueOn(feedbackId, attempt) is the
+ * cross-request lock: only attempt 1 is ever claimed, so of any number of
+ * concurrent submits/retries exactly one sends, at most once per feedback
+ * item (see src/server/notify.ts).
  */
 export const notificationsSchema: CollectionSchema = {
   name: 'notifications',

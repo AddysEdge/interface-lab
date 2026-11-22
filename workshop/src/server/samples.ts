@@ -10,6 +10,7 @@ import type { Env } from '../../worker'
 import type { CategoryId } from '../shared/categories'
 import type { ComponentData } from '../shared/types'
 import { fail, guard, isSignedIn, must } from './common'
+import { bumpLibraryVersion } from './library'
 
 export const SAMPLE_AUTHOR = 'InterfaceLab samples'
 
@@ -183,5 +184,6 @@ export const seedSamples: ActionHandler<Env> = (ctx) =>
       )
       created += 1
     }
+    if (created > 0) await bumpLibraryVersion(tools)
     return { success: true, data: { created, total: SAMPLES.length } }
   })

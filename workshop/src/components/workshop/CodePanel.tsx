@@ -22,11 +22,12 @@ async function copyText(text: string): Promise<boolean> {
 }
 
 /** Read-only code view with a copy button (HTML / CSS tabs). */
-export function CodePanel({ html, css }: { html: string; css: string }) {
-  const [tab, setTab] = useState<'html' | 'css'>('html')
+export function CodePanel({ html, css, js = '' }: { html: string; css: string; js?: string }) {
+  const [tab, setTab] = useState<'html' | 'css' | 'js'>('html')
+  const tabs = js.trim() ? (['html', 'css', 'js'] as const) : (['html', 'css'] as const)
   const [copied, setCopied] = useState<string | null>(null)
   const { success, error } = useToast()
-  const code = tab === 'html' ? html : css
+  const code = tab === 'html' ? html : tab === 'css' ? css : js
 
   async function handleCopy() {
     if (await copyText(code)) {
@@ -41,7 +42,7 @@ export function CodePanel({ html, css }: { html: string; css: string }) {
   return (
     <section aria-label="Source code" className="flex min-h-0 flex-col rounded-xl border border-border bg-card">
       <div className="flex items-center gap-1 border-b border-border p-1.5" role="tablist">
-        {(['html', 'css'] as const).map((value) => (
+        {tabs.map((value) => (
           <button
             key={value}
             role="tab"

@@ -5,16 +5,15 @@
  * - Opt-in only: the component owner must have enabled notifyOnFeedback.
  * - Recipient: the owner's account email from the platform users row, never
  *   a value from the request. Never for feedback on your own component.
- * - One sender at a time: every send first claims an attempt row in the
- *   `notifications` ledger. uniqueOn(feedbackId, attempt) lets exactly one of
- *   any number of concurrent submits/retries claim attempt N; the others get
- *   'in_progress' and do not send.
- * - Never re-sent after success. After a REPORTED failure a later retry may
- *   claim the next attempt, up to MAX_ATTEMPTS in total.
- * - Crash window: if a request dies after the provider accepted the email
- *   but before the attempt is marked sent, the attempt stays 'pending'. Once
- *   it is older than SEND_LEASE_MS a retry may send again, so a duplicate is
- *   possible only in that crash window (the provider call has no idempotency key).
+ * - At most one provider request per feedback item. Before sending, a request must
+ *   claim the item's single ledger row (uniqueOn(feedbackId, attempt) with
+ *   attempt = 1). The Durable Object applies writes serially, so exactly one
+ *   of any number of concurrent submits/retries wins the claim; every other
+ *   request gets 'already_handled' and never calls the provider.
+ * - No automatic re-send: a failed or interrupted send is recorded and not
+ *   retried. That trades a possibly missed notification for one application-side
+ *   provider request, even if a request crashes after provider acceptance.
+ *   Provider-side delivery is separate and has no exactly-once guarantee.
  * - Bounded: per-recipient and app-wide daily quotas, claimed only by the
  *   request that won the attempt.
  * - Never throws: the caller's feedback post succeeds regardless.
@@ -31,13 +30,12 @@ export type NotificationOutcome =
   | 'sent'
   | 'skipped'
   | 'not_opted_in'
-  | 'already_sent'
-  | 'in_progress'
+  | 'already_handled'
   | 'rate_limited'
   | 'failed'
 
-export const MAX_ATTEMPTS = 3
-export const SEND_LEASE_MS = 5 * 60_000
+/** The only attempt number ever claimed: at most one send per feedback item. */
+export const ONLY_ATTEMPT = 1
 
 interface AttemptRow {
   feedbackId: string
@@ -77,7 +75,6 @@ export async function notifyComponentOwner(
   tools: ActionTools,
   env: Pick<Env, 'APP_NAME'>,
   { feedback, component }: { feedback: FeedbackItem; component: LoadedComponent },
-  { now = Date.now() }: { now?: number } = {},
 ): Promise<NotificationOutcome> {
   try {
     const ownerId = component.data.ownerId
@@ -92,40 +89,18 @@ export async function notifyComponentOwner(
     const email = await accountEmail(tools, ownerId)
     if (!email) return 'skipped'
 
-    const attempts = must(
-      await tools.query<AttemptRow & Record<string, unknown>>('notifications', {
-        where: { feedbackId: feedback.recordId },
-        limit: MAX_ATTEMPTS + 10,
-      }),
-      'read notification ledger',
-    ).records
-    if (attempts.some((row) => row.data.status === 'sent')) return 'already_sent'
-    if (attempts.some((row) => row.data.status === 'skipped')) return 'rate_limited'
-
-    const latest = attempts.reduce<(typeof attempts)[number] | undefined>(
-      (best, row) => (!best || row.data.attempt > best.data.attempt ? row : best),
-      undefined,
-    )
-    if (latest?.data.status === 'pending') {
-      const age = now - Date.parse(latest.createdAt)
-      if (!(age >= SEND_LEASE_MS)) return 'in_progress' // another request holds the send
-      await setAttempt(tools, latest.recordId, { status: 'failed', lastError: 'send lease expired without a result' })
-    }
-    const next = (latest?.data.attempt ?? 0) + 1
-    if (next > MAX_ATTEMPTS) return 'failed'
-
-    // Claim attempt `next`. The Durable Object applies uniqueOn serially, so
-    // exactly one concurrent request creates this row; every other one stops.
+    // Claim the single attempt. Whoever creates this row owns the one send;
+    // everyone else (concurrent copies, later retries) stands down.
     const claim = await tools.create('notifications', {
       feedbackId: feedback.recordId,
       recipientId: ownerId,
-      attempt: next,
+      attempt: ONLY_ATTEMPT,
       status: 'pending',
       lastError: '',
     })
     if (!claim.success) {
-      if (isDuplicate(claim)) return 'in_progress'
-      must(claim, 'claim notification attempt')
+      if (isDuplicate(claim)) return 'already_handled'
+      must(claim, 'claim notification')
     }
     const attemptId = (claim as { data: { recordId: string } }).data.recordId
 

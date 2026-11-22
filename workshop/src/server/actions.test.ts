@@ -14,10 +14,13 @@ import type { ComponentData, FeedbackData } from '../shared/types'
 import { DOC_DOMAINS } from './docs'
 import { buildReviewPrompt, REVIEW_MODEL } from './review'
 import { SAMPLES } from './samples'
+import { searchLibrary } from './library'
+import { DEFAULT_STATE } from '../shared/listState'
 
 const OWNER = 'user_owner'
 const ALICE = 'user_alice'
 const BOB = 'user_bob'
+const CAROL = 'user_carol'
 const env = { APP_NAME: 'interfacelab', OWNER_USER_ID: OWNER } as unknown as Env
 
 let room: FakeRoom
@@ -186,12 +189,24 @@ describe('feedback between two users', () => {
     expect(room.all('feedback')).toHaveLength(0)
   })
 
-  it('stops a user deleting someone else’s feedback', async () => {
+  it('lets only the author, the component creator or the app owner remove feedback', async () => {
     const id = await publishedByAlice()
-    const posted = await postFeedback(BOB, id, 'Mine')
-    const fbId = posted.success ? posted.data.feedback.recordId : ''
-    expect(await call('deleteFeedback', ALICE, { id: fbId })).toMatchObject({ success: false, code: 'not_found' })
-    expect(room.all('feedback')).toHaveLength(1)
+    room.addUser(CAROL, { name: 'Carol', email: 'carol@example.com' })
+    const bobs = await postFeedback(BOB, id, 'Mine')
+    const bobId = bobs.success ? bobs.data.feedback.recordId : ''
+    const reply = await postFeedback(ALICE, id, 'Creator reply', { parentId: bobId })
+    const replyId = reply.success ? reply.data.feedback.recordId : ''
+
+    // A bystander cannot remove anything; B cannot remove the creator's reply.
+    expect(await call('deleteFeedback', CAROL, { id: bobId })).toMatchObject({ success: false, code: 'not_found' })
+    expect(await call('deleteFeedback', BOB, { id: replyId })).toMatchObject({ success: false, code: 'not_found' })
+    expect(room.all('feedback')).toHaveLength(2)
+
+    // The creator can remove feedback on their own component; the app owner can remove any.
+    expect(await call('deleteFeedback', ALICE, { id: bobId })).toMatchObject({ success: true })
+    expect(await call('deleteFeedback', OWNER, { id: replyId })).toMatchObject({ success: true })
+    expect(room.all('feedback')).toHaveLength(0)
+    expect(component(id).feedbackCount).toBe(0)
   })
 
   it('refuses feedback on drafts, replies to replies and replies across components', async () => {
@@ -268,7 +283,7 @@ describe('feedback notification email (email/send mocked)', () => {
     expect(room.integration).not.toHaveBeenCalled()
   })
 
-  it('keeps the feedback when the email fails, and a retry sends without duplicating', async () => {
+  it('keeps the feedback when the email fails, and never sends a second copy on retry', async () => {
     const id = await publishedByAlice()
     await optIn(ALICE)
     room.integration.mockResolvedValueOnce({ success: false, error: 'provider down', code: 'upstream_error' })
@@ -279,13 +294,10 @@ describe('feedback notification email (email/send mocked)', () => {
 
     room.integration.mockResolvedValue({ success: true, data: {} })
     const retry = await call('createFeedback', BOB, params)
-    expect(retry).toMatchObject({ success: true, data: { duplicate: true, notification: 'sent' } })
-    const again = await call('createFeedback', BOB, params)
-    expect(again).toMatchObject({ success: true, data: { notification: 'already_sent' } })
-    expect(room.integration.mock.calls.filter(([e]) => e === 'email/send')).toHaveLength(2) // 1 failed + 1 sent
+    expect(retry).toMatchObject({ success: true, data: { duplicate: true, notification: 'already_handled' } })
+    expect(room.integration.mock.calls.filter(([e]) => e === 'email/send')).toHaveLength(1) // at most one send
     expect(room.all('feedback')).toHaveLength(1)
-    const ledger = room.all('notifications').map((r) => r.data).sort((x, y) => Number(x.attempt) - Number(y.attempt))
-    expect(ledger).toMatchObject([{ attempt: 1, status: 'failed' }, { attempt: 2, status: 'sent' }])
+    expect(room.all('notifications').map((r) => r.data)).toMatchObject([{ attempt: 1, status: 'failed' }])
   })
 
   it('stops at the per-recipient daily quota', async () => {
@@ -394,5 +406,83 @@ describe('sample library', () => {
     expect(await call('seedSamples', OWNER)).toMatchObject({ success: true, data: { created: 0 } })
     const samples = room.all('components').map((r) => r.data as unknown as ComponentData)
     expect(samples.every((s) => s.isSample && s.status === 'published' && s.authorName === 'InterfaceLab samples')).toBe(true)
+  })
+})
+
+describe('moderation by the app owner', () => {
+  it('only the app owner can hide and restore components', async () => {
+    const id = await publishedByAlice()
+    expect(await call('moderateComponent', BOB, { id, action: 'hide' })).toMatchObject({ success: false, code: 'forbidden' })
+    expect(await call('moderateComponent', ALICE, { id, action: 'hide' })).toMatchObject({ success: false, code: 'forbidden' })
+    expect(await call('listHiddenComponents', ALICE)).toMatchObject({ success: false, code: 'forbidden' })
+    expect(component(id)).toMatchObject({ status: 'published', moderation: 'none' })
+  })
+
+  it('hiding takes a component and its feedback out of the library and blocks republishing', async () => {
+    const id = await publishedByAlice()
+    await postFeedback(BOB, id, 'Abusive?')
+    expect(await call('moderateComponent', OWNER, { id, action: 'hide' })).toMatchObject({ success: true, data: { moderation: 'hidden' } })
+    expect(component(id)).toMatchObject({ status: 'draft', moderation: 'hidden', ownerId: ALICE })
+    expect(feedbackRows().map((f) => f.componentStatus)).toEqual(['draft'])
+
+    // The creator keeps the draft and can edit it, but cannot republish it.
+    expect(await call('saveComponent', ALICE, { ...validComponent, id, title: 'Fixed' })).toMatchObject({ success: true })
+    expect(await call('setComponentStatus', ALICE, { id, status: 'published' })).toMatchObject({ success: false, code: 'moderated' })
+    expect(await call('listHiddenComponents', OWNER)).toMatchObject({ success: true, data: { items: [{ id, title: 'Fixed' }] } })
+
+    // Restoring lifts the lock; the creator decides when to republish.
+    expect(await call('moderateComponent', OWNER, { id, action: 'restore' })).toMatchObject({ success: true })
+    expect(component(id)).toMatchObject({ status: 'draft', moderation: 'none' })
+    expect(await call('setComponentStatus', ALICE, { id, status: 'published' })).toMatchObject({ success: true })
+  })
+
+  it('refuses moderation fields sent by a creator', async () => {
+    expect(await call('saveComponent', ALICE, { ...validComponent, moderation: 'none' })).toMatchObject({ success: false, code: 'invalid_input' })
+  })
+})
+
+describe('JavaScript components', () => {
+  it('stores bounded JavaScript with the component', async () => {
+    const saved = await call<{ id: string }>('saveComponent', ALICE, { ...validComponent, js: 'document.querySelector(".btn").textContent = "Hi"' })
+    expect(saved.success).toBe(true)
+    expect(component(saved.success ? saved.data.id : '').js).toContain('textContent')
+    const tooLong = await call('saveComponent', ALICE, { ...validComponent, js: 'x'.repeat(LIMITS.jsMax + 1) })
+    expect(tooLong).toMatchObject({ success: false, code: 'invalid_input' })
+  })
+})
+
+describe('server-side library search', () => {
+  it('returns one page of published, unmoderated components without their scripts', async () => {
+    const visible = await publishedByAlice()
+    await call('saveComponent', ALICE, { ...validComponent, id: visible, js: 'console.log(1)' })
+    const draft = await call<{ id: string }>('saveComponent', ALICE, { ...validComponent, title: 'Secret draft' })
+    const hidden = await publishedByAlice()
+    await call('moderateComponent', OWNER, { id: hidden, action: 'hide' })
+
+    const result = await searchLibrary(room.tools('library-search'), { ...DEFAULT_STATE, q: 'purple rounded' })
+    expect(result.total).toBe(1)
+    expect(result.items.map((i) => i.id)).toEqual([visible])
+    expect(result.items[0]).toMatchObject({ hasScript: true, status: 'published' })
+    expect(result.items[0]).not.toHaveProperty('js')
+    expect(result.items.some((i) => i.id === (draft.success ? draft.data.id : ''))).toBe(false)
+  })
+
+  it('paginates results on the server', async () => {
+    for (let i = 0; i < 30; i++) {
+      room.write(ALICE, 'components', { ...validComponent, title: `Bulk ${i}`, tags: ['bulk'], status: 'published', ownerId: ALICE, authorName: 'A', isSample: false, feedbackCount: 0, publishedAt: i, moderation: 'none' })
+    }
+    const page3 = await searchLibrary(room.tools('library-search'), { ...DEFAULT_STATE, q: 'bulk', page: 3 })
+    expect(page3.total).toBe(30)
+    expect(page3.pages).toBe(3)
+    expect(page3.items).toHaveLength(6)
+  })
+
+  it('changes the library version whenever published content changes', async () => {
+    const version = () => room.rows.get('library_meta:library')?.data.version
+    const id = await publishedByAlice()
+    const afterPublish = version()
+    expect(afterPublish).toBeTruthy()
+    await postFeedback(BOB, id, 'count changes')
+    expect(version()).not.toBe(afterPublish)
   })
 })

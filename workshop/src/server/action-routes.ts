@@ -87,7 +87,7 @@ export function keepRunning(c: { executionCtx: { waitUntil(promise: Promise<unkn
   ctx.waitUntil(running.catch(() => undefined))
 }
 
-function createActionTools(env: Env, userId: string, callerJwt: string): ActionTools {
+export function createActionTools(env: Env, userId: string, callerJwt: string): ActionTools {
   const stub = env.RECORD_ROOMS.get(env.RECORD_ROOMS.idFromName(`app:${env.DEEPSPACE_APP_ID}`))
 
   // The DO returns ActionResult<unknown>; callers below supply the precise

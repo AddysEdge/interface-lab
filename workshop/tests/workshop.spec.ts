@@ -245,3 +245,47 @@ test('AI review panel: suggestions apply on request; failures are recoverable', 
   await alice.page.getByRole('button', { name: 'Delete', exact: true }).last().click()
   await expect(alice.page).toHaveURL(/\/studio$/, { timeout: 15_000 })
 })
+
+test('JavaScript runs only on request, a navigating script is stopped, and creators can remove feedback', async ({ users }) => {
+  test.setTimeout(120_000)
+  const [alice, bob] = await users(2)
+
+  // A creates and publishes a component with JavaScript.
+  await alice.page.goto('/studio/new')
+  await alice.page.getByLabel('Title').fill(`__test-${RUN}__ Scripted counter`)
+  await alice.page.getByTestId('editor-html').fill('<button id="count">idle</button><button id="leave">leave</button>')
+  await alice.page.getByRole('tab', { name: 'js' }).click()
+  await alice.page.getByTestId('editor-js').fill(
+    "document.getElementById('count').textContent = 'ready';\ndocument.getElementById('leave').onclick = () => { location.href = 'https://example.invalid/' }",
+  )
+  await alice.page.getByRole('button', { name: 'Publish' }).click()
+  await expect(alice.page).toHaveURL(/\/c\/[A-Za-z0-9_-]+$/, { timeout: 15_000 })
+  const id = new URL(alice.page.url()).pathname.split('/').pop()!
+
+  // B: scripts are off until B opts in.
+  await bob.page.goto(`/c/${id}`)
+  const frame = bob.page.frameLocator('[data-testid="component-preview"]')
+  await expect(frame.locator('#count')).toHaveText('idle', { timeout: 15_000 })
+  await bob.page.getByTestId('run-scripts').click()
+  await expect(frame.locator('#count')).toHaveText('ready', { timeout: 15_000 })
+
+  // A script that navigates its own frame is stopped and the preview resets.
+  await frame.locator('#leave').click()
+  await expect(bob.page.getByText('JavaScript stopped')).toBeVisible({ timeout: 15_000 })
+  await expect(bob.page.getByTestId('run-scripts')).toHaveText(/Run JavaScript/)
+  await expect(frame.locator('#count')).toHaveText('idle', { timeout: 15_000 })
+
+  // The creator can remove someone else's feedback on their own component.
+  await bob.page.getByLabel('Leave feedback').fill('Please remove me')
+  await bob.page.getByRole('button', { name: 'Post feedback' }).click()
+  const onAlice = alice.page.getByTestId('feedback-item').filter({ hasText: 'Please remove me' })
+  await expect(onAlice).toBeVisible({ timeout: 15_000 })
+  await onAlice.getByRole('button', { name: 'Remove feedback' }).click()
+  await alice.page.getByRole('button', { name: 'Remove', exact: true }).click()
+  await expect(bob.page.getByTestId('feedback-item').filter({ hasText: 'Please remove me' })).toHaveCount(0, { timeout: 15_000 })
+
+  // Clean up.
+  await alice.page.getByTestId('owner-controls').getByRole('button', { name: 'Delete' }).click()
+  await alice.page.getByRole('button', { name: 'Delete', exact: true }).last().click()
+  await expect(alice.page).toHaveURL(/\/studio$/, { timeout: 15_000 })
+})

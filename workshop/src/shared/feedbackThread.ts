@@ -74,10 +74,19 @@ export function unmarkRemoved(state: LocalThreadState, recordId: string): LocalT
   return { ...state, removed: state.removed.filter((id) => id !== recordId) }
 }
 
-/** Live records + confirmed + pending, de-duplicated by recordId, oldest first. */
-export function mergeThread(live: FeedbackItem[], local: LocalThreadState): FeedbackItem[] {
+/**
+ * Live records + confirmed + pending, de-duplicated by recordId, oldest first.
+ *
+ * `seenLive` holds every id the live subscription has ever delivered. A
+ * confirmed (locally known) item is shown only until the subscription has
+ * delivered it; after that the live data alone decides, so a removal by
+ * someone else (the component's creator or the app owner) disappears here
+ * too. Order does not matter: the subscription may deliver a new post before
+ * or after the action that created it returns.
+ */
+export function mergeThread(live: FeedbackItem[], local: LocalThreadState, seenLive: ReadonlySet<string> = new Set()): FeedbackItem[] {
   const byId = new Map<string, FeedbackItem>()
-  for (const item of local.confirmed) byId.set(item.recordId, item)
+  for (const item of local.confirmed) if (!seenLive.has(item.recordId)) byId.set(item.recordId, item)
   for (const item of live) byId.set(item.recordId, item) // server copy wins
   const removed = new Set(local.removed)
   const merged = [...byId.values(), ...local.pending].filter((item) => !removed.has(item.recordId))
@@ -113,8 +122,14 @@ export function buildThreads(items: FeedbackItem[]): ThreadNode[] {
     .map((item) => ({ item, replies: items.filter((reply) => reply.parentId === item.recordId) }))
 }
 
-export function canDelete(item: FeedbackItem, userId: string | null): boolean {
-  return Boolean(userId) && !item.pending && !item.deleted && !isTempId(item.recordId) && item.authorId === userId
+/**
+ * Whether the viewer may remove an item: its author always; a moderator (the
+ * component's creator or the app owner) for any item on that component.
+ * The server enforces the same rule; this only decides which buttons to show.
+ */
+export function canDelete(item: FeedbackItem, userId: string | null, { moderator = false }: { moderator?: boolean } = {}): boolean {
+  if (!userId || item.pending || item.deleted || isTempId(item.recordId)) return false
+  return item.authorId === userId || moderator
 }
 
 export function canReply(item: FeedbackItem): boolean {

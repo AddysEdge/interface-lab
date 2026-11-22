@@ -89,16 +89,32 @@ and server-side authorization in place.
 
 Notification guarantees (`src/server/notify.ts`, tested in `src/server/consistency.test.ts`):
 
-- Each send first claims an attempt row in the `notifications` ledger. `uniqueOn
-  [feedbackId, attempt]` lets exactly one concurrent submit or retry claim attempt *N*; the
-  others return `in_progress` and neither send nor consume quota.
-- A delivered email is never re-sent. After a reported failure, a retry may claim the next
-  attempt, up to 3 in total. Quota-skipped notifications are final.
-- A pending attempt blocks retries for a 5-minute lease. If a request crashes after the
-  provider accepted the email but before recording it, a retry after the lease can send a
-  duplicate; `email/send` has no idempotency key.
+- At most one email-send request per feedback item. Before sending, a request must claim the item's single
+  ledger row (`uniqueOn [feedbackId, attempt]`, attempt 1). Exactly one concurrent submit or
+  retry wins; the others return `already_handled` and neither send nor consume quota.
+- No automatic re-send: failed or interrupted sends are not retried, including when a request
+  crashes after provider acceptance. This prevents a duplicate application-side send request,
+  at the cost of possibly missed notifications. Inbox delivery is controlled by the provider;
+  the app does not claim exactly-once delivery.
 - Limits: 20 emails per recipient and 200 per app per day. A failed email never fails the
   feedback post.
+
+Moderation (`moderateComponent`, `listHiddenComponents`, `deleteFeedback`): only the app owner
+(`OWNER_USER_ID`) can hide or restore components; hiding uses the same fail-closed sequence as
+unpublishing and sets `moderation: 'hidden'`, which blocks republishing. Feedback can be removed
+by its author, the component's creator, or the app owner.
+
+Library search (`GET /api/library`, `src/server/library.ts`): public, server-side, one page per
+request, published and unmoderated components only, scripts never included. Responses use
+`Cache-Control: no-store` so an old version's URL cannot reveal unpublished code. Changes to
+published content update `library_meta`; browsers subscribe to that record and refetch.
+
+Component JavaScript (`src/shared/preview.ts`): scripts run only on explicit request with
+`sandbox="allow-scripts"` (never `allow-same-origin`) and a CSP with `connect-src 'none'`.
+The sandbox blocks parent-page access, forms, popups and top-level navigation; the CSP blocks
+remote subresources and network APIs. A script can still start a navigation of its own frame
+before the load handler detects it and resets the preview with scripts off. HTML/CSS previews
+and library thumbnails keep scripts disabled.
 
 Feedback visibility (`src/server/visibility.ts`): unpublish hides feedback before flipping the
 component and converges again afterwards; publish flips first, then reveals. Failures are

@@ -13,7 +13,7 @@ import { settingsSchema } from './schemas/admin-schema'
 import { componentsSchema } from './schemas/components-schema'
 import { feedbackSchema } from './schemas/feedback-schema'
 import { preferencesSchema } from './schemas/preferences-schema'
-import { notificationsSchema, usageSchema } from './schemas/server-only-schemas'
+import { libraryMetaSchema, notificationsSchema, usageSchema } from './schemas/server-only-schemas'
 
 export const schemas: CollectionSchema[] = [
   usersSchema,
@@ -23,4 +23,5 @@ export const schemas: CollectionSchema[] = [
   preferencesSchema,
   usageSchema,
   notificationsSchema,
+  libraryMetaSchema,
 ]

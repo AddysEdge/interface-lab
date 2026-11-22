@@ -1,30 +1,44 @@
 /**
  * Isolated component preview.
  *
- * Submitted HTML/CSS is untrusted. It is rendered in an <iframe sandbox="">
- * (no allow-* tokens), which gives the frame an opaque origin: no cookies, no
- * localStorage/IndexedDB, no access to window.parent, no scripts, no forms,
- * no popups and no top-level navigation. The document also carries a CSP that
- * blocks scripts and every network fetch except inline styles and data: URIs,
- * so a preview cannot phone home (no tracking pixels, no remote fonts).
+ * Submitted code is untrusted. It is rendered in a sandboxed <iframe> WITHOUT
+ * `allow-same-origin`, which gives the frame an opaque origin: no cookies, no
+ * localStorage/IndexedDB, no access to window.parent, no forms, no popups, no
+ * modal dialogs and no top-level navigation. The document carries a CSP that
+ * blocks remote subresources and network APIs (tracking pixels, remote fonts,
+ * fetch/XHR and WebSockets); only inline styles, data: images/fonts and, when enabled, the
+ * component's own inline script are allowed.
  *
- * Component previews currently support HTML and CSS only.
+ * Scripts are OFF by default (`sandbox=""`, `script-src 'none'`). They run only
+ * when a viewer explicitly chooses to (detail page) or the author enables them
+ * (editor): then the sandbox gains exactly `allow-scripts` and the CSP allows
+ * the inline script. Library thumbnails never run scripts. A script can still
+ * navigate its own frame, which can initiate a remote request before PreviewFrame
+ * detects the load and resets the preview with scripts off.
  */
 
-/** iframe attributes. `sandbox` MUST stay empty: adding tokens weakens isolation. */
+/** iframe sandbox tokens. Never add allow-same-origin, allow-top-navigation, allow-popups, allow-forms or allow-modals. */
 export const PREVIEW_SANDBOX = ''
+export const PREVIEW_SANDBOX_WITH_SCRIPTS = 'allow-scripts'
 export const PREVIEW_REFERRER_POLICY = 'no-referrer'
 
-export const PREVIEW_CSP = [
-  "default-src 'none'",
-  "style-src 'unsafe-inline'",
-  'img-src data:',
-  'font-src data:',
-  "media-src 'none'",
-  "script-src 'none'",
-  "form-action 'none'",
-  "base-uri 'none'",
-].join('; ')
+function csp(runScripts: boolean): string {
+  return [
+    "default-src 'none'",
+    "style-src 'unsafe-inline'",
+    'img-src data:',
+    'font-src data:',
+    "media-src 'none'",
+    "connect-src 'none'",
+    runScripts ? "script-src 'unsafe-inline'" : "script-src 'none'",
+    "form-action 'none'",
+    "base-uri 'none'",
+  ].join('; ')
+}
+
+/** The no-scripts policy (kept as a constant for tests and documentation). */
+export const PREVIEW_CSP = csp(false)
+export const PREVIEW_CSP_WITH_SCRIPTS = csp(true)
 
 /**
  * Prevent user CSS from closing the <style> element early. HTML parsing ends a
@@ -36,15 +50,32 @@ export function escapeStyleText(css: string): string {
 }
 
 /**
- * `scrollable: false` is for small, non-interactive thumbnails: overflow is clipped
- * instead of showing scrollbars inside the card.
+ * Prevent user JavaScript from closing the <script> element early or entering
+ * the HTML parser's "script data escaped" states. Inside string literals and
+ * regexes "\/" and "\!" are equivalent to "/" and "!", so valid code keeps working.
  */
-export function buildPreviewDocument({ html, css, dark = false, scrollable = true }: { html: string; css: string; dark?: boolean; scrollable?: boolean }): string {
+export function escapeScriptText(js: string): string {
+  return js.replace(/<\/(script)/gi, '<\\/$1').replace(/<!--/g, '<\\!--')
+}
+
+export interface PreviewOptions {
+  html: string
+  css: string
+  js?: string
+  /** Include and allow the component's script. Off by default. */
+  runScripts?: boolean
+  dark?: boolean
+  /** `false` for small, non-interactive thumbnails: overflow is clipped instead of scrolling. */
+  scrollable?: boolean
+}
+
+export function buildPreviewDocument({ html, css, js = '', runScripts = false, dark = false, scrollable = true }: PreviewOptions): string {
+  const withScript = runScripts && js.trim().length > 0
   return `<!doctype html>
 <html lang="en"${dark ? ' class="dark"' : ''}>
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="${PREVIEW_CSP}">
+<meta http-equiv="Content-Security-Policy" content="${csp(withScript)}">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
@@ -56,6 +87,6 @@ ${scrollable ? '' : 'html,body{overflow:hidden}\n'}</style>
 </head>
 <body>
 ${html}
-</body>
+${withScript ? `<script>${escapeScriptText(js)}</script>\n` : ''}</body>
 </html>`
 }

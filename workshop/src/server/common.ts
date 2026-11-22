@@ -19,6 +19,11 @@ export function invalid(error: z.ZodError): ActionResult<never> {
   return fail('invalid_input', message, { fields })
 }
 
+/** The app owner moderates the library (hide components, remove any feedback). */
+export function isModerator(userId: string, env: { OWNER_USER_ID?: string }): boolean {
+  return Boolean(env.OWNER_USER_ID) && userId === env.OWNER_USER_ID
+}
+
 export function isSignedIn(userId: string | undefined): userId is string {
   return Boolean(userId) && !userId!.startsWith('anon-')
 }

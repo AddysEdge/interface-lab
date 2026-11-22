@@ -11,6 +11,7 @@ export const LIMITS = {
   tagMax: 24,
   htmlMax: 20_000,
   cssMax: 20_000,
+  jsMax: 20_000,
   feedbackMax: 1_000,
   nameMax: 80,
   idMax: 64,

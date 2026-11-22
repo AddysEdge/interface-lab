@@ -9,7 +9,7 @@
  * - Idempotent: each submit carries a clientRequestId; a retry after a network
  *   error returns the original record instead of posting twice.
  */
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useRef, useState, type FormEvent } from 'react'
 import { AuthOverlay, useAuth, useQuery } from 'deepspace'
 import { MessageSquare, Reply, Send, Trash2 } from 'lucide-react'
 import { Button, ConfirmModal, Textarea, useToast } from '../ui'
@@ -44,7 +44,11 @@ function timeAgo(iso: string): string {
   return `${value} ${label}${value === 1 ? '' : 's'} ago`
 }
 
-export function FeedbackSection({ componentId, componentOwnerId }: { componentId: string; componentOwnerId: string }) {
+/**
+ * `canModerate`: the viewer created this component or owns the app, so they may
+ * remove anyone's feedback here (the server enforces the same rule).
+ */
+export function FeedbackSection({ componentId, componentOwnerId, canModerate = false }: { componentId: string; componentOwnerId: string; canModerate?: boolean }) {
   const { isSignedIn, userId } = useAuth()
   const { error: toastError, success } = useToast()
   const { records, status } = useQuery<FeedbackData>('feedback', {
@@ -71,7 +75,12 @@ export function FeedbackSection({ componentId, componentOwnerId }: { componentId
       })),
     [records],
   )
-  const items = useMemo(() => mergeThread(live, local), [live, local])
+  // Ids the live subscription has ever delivered; see mergeThread.
+  const seenLive = useRef(new Set<string>())
+  const items = useMemo(() => {
+    for (const item of live) seenLive.current.add(item.recordId)
+    return mergeThread(live, local, seenLive.current)
+  }, [live, local])
   const threads = useMemo(() => buildThreads(items), [items])
   const count = items.filter((item) => !item.pending).length
 
@@ -131,7 +140,8 @@ export function FeedbackSection({ componentId, componentOwnerId }: { componentId
               <FeedbackEntry
                 item={item}
                 isOwnerReply={item.authorId === componentOwnerId}
-                canDelete={canDelete(item, userId)}
+                canDelete={canDelete(item, userId, { moderator: canModerate })}
+                ownItem={item.authorId === userId}
                 onDelete={() => setConfirmDelete(item)}
                 onReply={isSignedIn && canReply(item) ? () => setReplyTo(replyTo === item.recordId ? null : item.recordId) : undefined}
               />
@@ -142,7 +152,8 @@ export function FeedbackSection({ componentId, componentOwnerId }: { componentId
                       <FeedbackEntry
                         item={reply}
                         isOwnerReply={reply.authorId === componentOwnerId}
-                        canDelete={canDelete(reply, userId)}
+                        canDelete={canDelete(reply, userId, { moderator: canModerate })}
+                        ownItem={reply.authorId === userId}
                         onDelete={() => setConfirmDelete(reply)}
                       />
                     </li>
@@ -174,9 +185,9 @@ export function FeedbackSection({ componentId, componentOwnerId }: { componentId
         open={confirmDelete !== null}
         onClose={() => setConfirmDelete(null)}
         onConfirm={() => confirmDelete && remove(confirmDelete)}
-        title="Delete this feedback?"
+        title={confirmDelete && confirmDelete.authorId !== userId ? 'Remove this feedback?' : 'Delete this feedback?'}
         description="It will be removed for everyone. Replies to it stay visible."
-        confirmText="Delete"
+        confirmText={confirmDelete && confirmDelete.authorId !== userId ? 'Remove' : 'Delete'}
       />
       {showAuth && <AuthOverlay onClose={() => setShowAuth(false)} />}
     </section>
@@ -187,12 +198,14 @@ function FeedbackEntry({
   item,
   isOwnerReply,
   canDelete: deletable,
+  ownItem = true,
   onDelete,
   onReply,
 }: {
   item: FeedbackItem
   isOwnerReply: boolean
   canDelete: boolean
+  ownItem?: boolean
   onDelete: () => void
   onReply?: () => void
 }) {
@@ -215,8 +228,8 @@ function FeedbackEntry({
             </Button>
           )}
           {deletable && (
-            <Button size="sm" variant="ghost" className="h-7 px-2 text-destructive" onClick={onDelete} aria-label="Delete feedback">
-              <Trash2 aria-hidden /> Delete
+            <Button size="sm" variant="ghost" className="h-7 px-2 text-destructive" onClick={onDelete} aria-label={ownItem ? 'Delete feedback' : 'Remove feedback'}>
+              <Trash2 aria-hidden /> {ownItem ? 'Delete' : 'Remove'}
             </Button>
           )}
         </div>

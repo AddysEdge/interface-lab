@@ -15,7 +15,7 @@ import type { FeedbackItem } from '../shared/feedbackThread'
 import { LIMITS } from '../shared/limits'
 import type { FeedbackData } from '../shared/types'
 import { feedbackInputSchema, idInputSchema } from '../shared/validation'
-import { displayName, fail, getComponent, guard, invalid, isDuplicate, isSignedIn, must } from './common'
+import { displayName, fail, getComponent, guard, invalid, isDuplicate, isModerator, isSignedIn, must } from './common'
 import { refreshFeedbackCount } from './components'
 import { notifyComponentOwner, type NotificationOutcome } from './notify'
 import { claimSlot } from './quota'
@@ -122,14 +122,20 @@ async function withdrawFeedback(tools: ActionTools, recordId: string): Promise<v
 
 export const deleteFeedback: ActionHandler<Env> = (ctx) =>
   guard('deleteFeedback', async () => {
-    const { userId, tools } = ctx
+    const { userId, tools, env } = ctx
     if (!isSignedIn(userId)) return fail('unauthenticated', 'Sign in to manage your feedback.')
     const parsed = idInputSchema.safeParse(ctx.params)
     if (!parsed.success) return invalid(parsed.error)
 
     const feedback = await loadFeedback(tools, parsed.data.id)
-    // Someone else's feedback answers like a missing item: no confirmation either way.
-    if (!feedback || feedback.authorId !== userId) return fail('not_found', 'Feedback not found, or it is not yours.')
+    // Who may remove it: its author, the creator of the component it is on, or the app owner.
+    let allowed = Boolean(feedback) && (feedback!.authorId === userId || isModerator(userId, env))
+    if (feedback && !allowed) {
+      const component = await getComponent(tools, feedback.componentId)
+      allowed = component?.data.ownerId === userId
+    }
+    // Anyone else gets the same answer as for a missing item: no confirmation either way.
+    if (!feedback || !allowed) return fail('not_found', 'Feedback not found, or you cannot remove it.')
 
     must(await tools.remove('feedback', feedback.recordId), 'delete feedback')
     // Replies stay; the thread shows a "feedback deleted" placeholder above them.

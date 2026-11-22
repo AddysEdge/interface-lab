@@ -1,13 +1,15 @@
 /**
- * Public component library (/home). Visitors and members see published
- * components only: the subscription is filtered by the Durable Object's
- * read rule before any record reaches the browser.
+ * Public component library (/home).
  *
  * Search, category, sort and page live in the URL (src/shared/listState.ts).
- * Matching runs locally over the live subscription, so results stay in sync
- * with new publications and no response can arrive out of order.
+ * Results come one page at a time from the server (GET /api/library), which
+ * searches every published component, so the library has no size cap and a
+ * visitor downloads only the cards on screen. A tiny live record
+ * (library_meta) changes whenever published content changes; the page
+ * refetches when it does. Each request is tagged and aborted when superseded,
+ * so an older response can never overwrite a newer one.
  */
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth, useQuery, useUser } from 'deepspace'
 import { Boxes, Plus, RefreshCw, Search, SearchX } from 'lucide-react'
@@ -15,8 +17,8 @@ import { Button, EmptyState, useToast } from '@/components/ui'
 import { ComponentCard, ComponentCardSkeleton } from '@/components/workshop/ComponentCard'
 import { Pagination } from '@/components/workshop/Pagination'
 import { CATEGORIES } from '@/shared/categories'
-import { buildSearch, parseListState, PAGE_SIZE, selectPage, SORTS, withFilters, type Sort } from '@/shared/listState'
-import type { ComponentData } from '@/shared/types'
+import { buildSearch, parseListState, PAGE_SIZE, SORTS, withFilters, type Sort } from '@/shared/listState'
+import type { LibraryCard } from '@/server/library'
 import { callAction } from '@/lib/api'
 
 const SORT_LABELS: Record<Sort, string> = { newest: 'Newest', feedback: 'Most feedback', title: 'A–Z' }
@@ -25,26 +27,51 @@ export default function LibraryPage() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const state = useMemo(() => parseListState(params), [params])
-  const { records, status, error } = useQuery<ComponentData>('components', {
-    where: { status: 'published' },
-    orderBy: 'createdAt',
-    orderDir: 'desc',
-    limit: 500,
-  })
+  const search = buildSearch(state)
+  const meta = useQuery<{ version: string }>('library_meta', { limit: 1 })
+  const version = meta.records[0]?.data.version ?? ''
+  const metaReady = meta.status !== 'loading'
 
-  const items = useMemo(
-    () => records.map((r) => ({ ...r.data, id: r.recordId, createdAt: r.createdAt })),
-    [records],
-  )
-  const view = useMemo(() => selectPage(items, state), [items, state])
+  const [result, setResult] = useState<LibraryResult>({ status: 'loading', search: null, items: [], total: 0, pages: 0, page: 1 })
+  const [reload, setReload] = useState(0)
+  const latest = useRef(0)
+
+  useEffect(() => {
+    if (!metaReady) return
+    const requestId = ++latest.current
+    const controller = new AbortController()
+    setResult((previous) => ({ ...previous, status: 'loading' }))
+    const url = `/api/library?${search ? `${search}&` : ''}v=${encodeURIComponent(version)}`
+    fetch(url, { signal: controller.signal })
+      .then(async (response) => {
+        const body = (await response.json().catch(() => null)) as
+          | { success?: boolean; error?: string; data?: Pick<LibraryResult, 'items' | 'total' | 'pages' | 'page'> }
+          | null
+        if (requestId !== latest.current) return // a newer request superseded this one
+        if (!response.ok || !body?.success) throw new Error(body?.error ?? `The library returned ${response.status}.`)
+        const data = body.data ?? { items: [], total: 0, pages: 0, page: 1 }
+        setResult({ status: 'ready', search, items: data.items, total: data.total, pages: data.pages, page: data.page })
+      })
+      .catch((err: Error) => {
+        if (err.name === 'AbortError' || requestId !== latest.current) return
+        setResult((previous) => ({ ...previous, status: 'error', error: err.message }))
+      })
+    return () => controller.abort()
+  }, [search, version, metaReady, reload])
+
+  const view = result
+  const status = result.status
+  const error = result.error
+  // Show skeletons for a new query; keep the current cards during a live refresh.
+  const loading = status === 'loading' && result.search !== search
 
   // Keep the URL honest: a page past the end is replaced with the last real page.
   useEffect(() => {
-    if (status === 'ready' && view.page !== state.page) {
-      const search = buildSearch({ ...state, page: view.page })
-      navigate({ search: search ? `?${search}` : '' }, { replace: true })
+    if (status === 'ready' && result.search === search && view.page !== state.page) {
+      const next = buildSearch({ ...state, page: view.page })
+      navigate({ search: next ? `?${next}` : '' }, { replace: true })
     }
-  }, [status, view.page, state, navigate])
+  }, [status, result.search, search, view.page, state, navigate])
 
   function applyFilters(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -58,7 +85,6 @@ export default function LibraryPage() {
     navigate({ search: search ? `?${search}` : '' })
   }
 
-  const loading = status === 'loading'
   const filtered = Boolean(state.q || state.category)
 
   return (
@@ -127,8 +153,8 @@ export default function LibraryPage() {
           <EmptyState
             icon={<RefreshCw />}
             title="Couldn’t load the library"
-            description={error ?? 'The live connection failed. It retries automatically; you can also reload.'}
-            action={{ label: 'Reload', onClick: () => window.location.reload() }}
+            description={error ?? 'The library could not be loaded.'}
+            action={{ label: 'Try again', onClick: () => setReload((n) => n + 1) }}
           />
         ) : loading ? (
           <Grid>{Array.from({ length: PAGE_SIZE }, (_, i) => <ComponentCardSkeleton key={i} />)}</Grid>
@@ -155,6 +181,17 @@ export default function LibraryPage() {
       </div>
     </div>
   )
+}
+
+interface LibraryResult {
+  status: 'loading' | 'ready' | 'error'
+  /** The query string these results belong to (null before the first response). */
+  search: string | null
+  items: LibraryCard[]
+  total: number
+  pages: number
+  page: number
+  error?: string
 }
 
 function Grid({ children }: { children: React.ReactNode }) {
@@ -185,7 +222,7 @@ function EmptyLibrary() {
       <EmptyState
         icon={<Boxes />}
         title="No published components yet"
-        description="Create the first one: write HTML and CSS, preview it, and publish when it is ready."
+        description="Create the first one: write HTML, CSS and optional JavaScript, preview it, and publish when it is ready."
       />
       {isOwner && (
         <div className="-mt-8 flex justify-center">

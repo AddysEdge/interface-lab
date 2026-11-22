@@ -44,7 +44,7 @@ export default function StudioPage() {
         <EmptyState
           icon={<PenSquare />}
           title="You haven’t created anything yet"
-          description="Start from a blank component: write HTML and CSS, watch the live preview, save a draft and publish when ready."
+          description="Start from a blank component: write HTML, CSS and optional JavaScript, watch the live preview, save a draft and publish when ready."
           action={{ label: 'Create your first component', onClick: () => navigate('/studio/new') }}
         />
       ) : (

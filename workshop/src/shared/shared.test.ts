@@ -21,7 +21,7 @@ import {
   type FeedbackItem,
 } from './feedbackThread'
 import { componentInputSchema, feedbackInputSchema } from './validation'
-import { buildPreviewDocument, escapeStyleText, PREVIEW_CSP, PREVIEW_SANDBOX } from './preview'
+import { buildPreviewDocument, escapeScriptText, escapeStyleText, PREVIEW_CSP, PREVIEW_CSP_WITH_SCRIPTS, PREVIEW_SANDBOX, PREVIEW_SANDBOX_WITH_SCRIPTS } from './preview'
 
 describe('multiword search', () => {
   const item = { title: 'Pill', description: '', category: 'buttons', tags: ['blue', 'animated', 'rounded'] }
@@ -116,6 +116,18 @@ describe('feedback thread with persisted ids', () => {
     expect(mergeThread([persisted], local)).toHaveLength(1)
   })
 
+  it('lets a removal by someone else show up, whichever arrives first', () => {
+    const temp = createTempId()
+    const persisted: FeedbackItem = { ...base, recordId: 'rec0009', createdAt: '2026-01-01T00:00:01Z' }
+    const local = confirmPending(addPending(EMPTY_LOCAL, { ...base, recordId: temp, createdAt: '2026-01-01T00:00:00Z' }), temp, persisted)
+    // Not yet delivered live: the confirmed copy keeps the item on screen.
+    expect(mergeThread([], local, new Set())).toHaveLength(1)
+    // Delivered live (before or after the action returned), then removed on the server.
+    const seen = new Set(['rec0009'])
+    expect(mergeThread([persisted], local, seen)).toHaveLength(1)
+    expect(mergeThread([], local, seen)).toHaveLength(0)
+  })
+
   it('rolls back failures and hides deleted items', () => {
     const temp = createTempId()
     const local = failPending(addPending(EMPTY_LOCAL, { ...base, recordId: temp, createdAt: '2026-01-01T00:00:00Z' }), temp)
@@ -156,6 +168,24 @@ describe('preview document', () => {
     expect(PREVIEW_CSP).toContain("script-src 'none'")
     expect(PREVIEW_CSP).toContain("default-src 'none'")
     expect(PREVIEW_CSP).not.toMatch(/https?:/)
+  })
+
+  it('runs component JavaScript only when explicitly enabled', () => {
+    const off = buildPreviewDocument({ html: '<b>x</b>', css: '', js: 'window.ran = 1' })
+    expect(off).not.toContain('window.ran')
+    expect(off).toContain("script-src 'none'")
+    const on = buildPreviewDocument({ html: '<b>x</b>', css: '', js: 'window.ran = 1', runScripts: true })
+    expect(on).toContain('<script>window.ran = 1</script>')
+    expect(on).toContain("script-src 'unsafe-inline'")
+    expect(PREVIEW_CSP_WITH_SCRIPTS).toContain("connect-src 'none'")
+    expect(PREVIEW_CSP_WITH_SCRIPTS).toContain("default-src 'none'")
+    expect(PREVIEW_SANDBOX_WITH_SCRIPTS).toBe('allow-scripts') // never allow-same-origin
+  })
+
+  it('stops user JavaScript from closing the script element', () => {
+    const doc = buildPreviewDocument({ html: '', css: '', js: 'a = "</script><img src=x onerror=alert(1)>"; b = "<!--"', runScripts: true })
+    expect(doc.match(/<\/script>/gi)).toHaveLength(1)
+    expect(escapeScriptText('<!--')).toBe('<\\!--')
   })
 
   it('clips overflow in non-interactive thumbnails only', () => {

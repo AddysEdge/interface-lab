@@ -9,7 +9,7 @@ import { seo } from '../seo'
 
 const STEPS = [
   { title: 'Browse', body: 'Search a small, curated library of HTML/CSS components by title, category or tag.' },
-  { title: 'Create', body: 'Write HTML and CSS with a live preview, save private drafts, then publish.' },
+  { title: 'Create', body: 'Write HTML, CSS and optional JavaScript with a sandboxed live preview, save private drafts, then publish.' },
   { title: 'Improve', body: 'Ask the AI reviewer for tags, a description and accessibility pointers, with links to real docs.' },
   { title: 'Discuss', body: 'Share the link. Others copy the code and leave feedback; creators can get an email.' },
 ]

@@ -73,6 +73,7 @@ export const componentInputSchema = z.strictObject({
   tags: tagsSchema.default([]),
   html: code(LIMITS.htmlMax, 'HTML'),
   css: code(LIMITS.cssMax, 'CSS').default(''),
+  js: code(LIMITS.jsMax, 'JavaScript').default(''),
 })
 export type ComponentInput = z.output<typeof componentInputSchema>
 
@@ -90,6 +91,11 @@ export const statusInputSchema = z.strictObject({
 })
 
 export const idInputSchema = z.strictObject({ id: recordIdSchema })
+
+export const moderationInputSchema = z.strictObject({
+  id: recordIdSchema,
+  action: z.enum(['hide', 'restore']),
+})
 
 export const feedbackInputSchema = z.strictObject({
   componentId: recordIdSchema,

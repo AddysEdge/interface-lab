@@ -1,16 +1,19 @@
 /**
- * Component actions: save a draft, publish/unpublish, delete.
+ * Component actions: save a draft, publish/unpublish, delete, and the app
+ * owner's moderation (hide/restore).
  *
- * Only the owner may change a component. ownerId is bound to the verified
- * caller by the platform, and authorName / feedbackCount / isSample /
- * publishedAt are written here only, never taken from params.
+ * Only the owner may change a component; only the app owner may moderate.
+ * ownerId is bound to the verified caller by the platform, and authorName /
+ * feedbackCount / isSample / publishedAt / moderation are written here only,
+ * never taken from params.
  */
 import type { ActionHandler, ActionTools } from 'deepspace/worker'
 import type { Env } from '../../worker'
 import { LIMITS } from '../shared/limits'
 import type { ComponentStatus } from '../shared/types'
-import { componentInputSchema, idInputSchema, publishProblems, statusInputSchema } from '../shared/validation'
-import { displayName, fail, getOwnedComponent, guard, invalid, isSignedIn, must } from './common'
+import { componentInputSchema, idInputSchema, moderationInputSchema, publishProblems, statusInputSchema } from '../shared/validation'
+import { displayName, fail, getComponent, getOwnedComponent, guard, invalid, isModerator, isSignedIn, must } from './common'
+import { bumpLibraryVersion } from './library'
 import { convergeFeedbackVisibility, hideFeedback, queryAll } from './visibility'
 
 const NOT_FOUND = 'Component not found, or you do not own it.'
@@ -40,6 +43,7 @@ export const saveComponent: ActionHandler<Env> = (ctx) =>
           isSample: false,
           feedbackCount: 0,
           publishedAt: 0,
+          moderation: 'none',
         }),
         'create component',
       )
@@ -54,6 +58,7 @@ export const saveComponent: ActionHandler<Env> = (ctx) =>
       if (problems.length) return fail('invalid_input', problems[0], { problems })
     }
     must(await tools.update('components', id, fields), 'update component')
+    if (existing.data.status === 'published') await bumpLibraryVersion(tools)
     return { success: true, data: { id, status: existing.data.status } }
   })
 
@@ -68,6 +73,9 @@ export const setComponentStatus: ActionHandler<Env> = (ctx) =>
     const existing = await getOwnedComponent(tools, id, userId)
     if (!existing) return fail('not_found', NOT_FOUND)
     if (status === 'published') {
+      if (existing.data.moderation === 'hidden') {
+        return fail('moderated', 'This component was hidden by the app owner and cannot be republished. You can still edit or delete it.')
+      }
       const problems = publishProblems(existing.data)
       if (problems.length) return fail('invalid_input', problems[0], { problems })
     }
@@ -86,6 +94,7 @@ export const setComponentStatus: ActionHandler<Env> = (ctx) =>
       if (!(await attempt(() => convergeFeedbackVisibility(tools, id)))) {
         return fail('visibility_incomplete', 'The component is unpublished, but hiding some recent feedback did not finish. Unpublish again to complete it.')
       }
+      await bumpLibraryVersion(tools)
       return { success: true, data: { id, status } }
     }
 
@@ -97,7 +106,57 @@ export const setComponentStatus: ActionHandler<Env> = (ctx) =>
     if (!(await attempt(() => convergeFeedbackVisibility(tools, id)))) {
       return fail('visibility_incomplete', 'Published, but some feedback is still hidden. Publish again to finish showing it.')
     }
+    await bumpLibraryVersion(tools)
     return { success: true, data: { id, status } }
+  })
+
+/**
+ * App-owner moderation. "hide" takes a component out of the library the same
+ * fail-closed way as unpublishing (feedback hidden first) and locks it against
+ * republishing; "restore" lifts the lock (it stays a draft until its creator
+ * republishes). The creator keeps their draft and can still edit or delete it.
+ */
+export const moderateComponent: ActionHandler<Env> = (ctx) =>
+  guard('moderateComponent', async () => {
+    const { userId, tools, env } = ctx
+    if (!isSignedIn(userId)) return fail('unauthenticated', 'Sign in first.')
+    if (!isModerator(userId, env)) return fail('forbidden', 'Only the app owner can moderate components.')
+    const parsed = moderationInputSchema.safeParse(ctx.params)
+    if (!parsed.success) return invalid(parsed.error)
+    const { id, action } = parsed.data
+
+    const existing = await getComponent(tools, id)
+    if (!existing) return fail('not_found', 'Component not found.')
+
+    if (action === 'restore') {
+      must(await tools.update('components', id, { moderation: 'none' }), 'restore component')
+      return { success: true, data: { id, moderation: 'none', status: existing.data.status } }
+    }
+
+    if (!(await attempt(() => hideFeedback(tools, id)))) {
+      return fail('visibility_incomplete', 'Could not hide this component\u2019s feedback, so it is still visible. Please try again.')
+    }
+    if (!(await attempt(async () => must(await tools.update('components', id, { status: 'draft', moderation: 'hidden' }), 'hide component')))) {
+      return fail('visibility_incomplete', 'Could not hide the component. It is still visible; please try again.')
+    }
+    if (!(await attempt(() => convergeFeedbackVisibility(tools, id)))) {
+      return fail('visibility_incomplete', 'The component is hidden, but hiding some recent feedback did not finish. Hide it again to complete it.')
+    }
+    await bumpLibraryVersion(tools)
+    return { success: true, data: { id, moderation: 'hidden', status: 'draft' } }
+  })
+
+/** Hidden components for the moderation dashboard (they are drafts, so no one else can read them). */
+export const listHiddenComponents: ActionHandler<Env> = (ctx) =>
+  guard('listHiddenComponents', async () => {
+    const { userId, tools, env } = ctx
+    if (!isSignedIn(userId)) return fail('unauthenticated', 'Sign in first.')
+    if (!isModerator(userId, env)) return fail('forbidden', 'Only the app owner can moderate components.')
+    const hidden = await queryAll<{ title: string; authorName: string; category: string } & Record<string, unknown>>(tools, 'components', { moderation: 'hidden' })
+    return {
+      success: true,
+      data: { items: hidden.map((r) => ({ id: r.recordId, title: r.data.title, authorName: r.data.authorName, category: r.data.category, updatedAt: r.updatedAt })) },
+    }
   })
 
 /** Run a step; log and report failure instead of throwing. */
@@ -128,6 +187,7 @@ export const deleteComponent: ActionHandler<Env> = (ctx) =>
       if (deleted < 500) break
     }
     must(await tools.remove('components', existing.id), 'delete component')
+    if (existing.data.status === 'published') await bumpLibraryVersion(tools)
     return { success: true, data: { id: existing.id } }
   })
 
@@ -141,6 +201,7 @@ export async function refreshFeedbackCount(tools: ActionTools, componentId: stri
     // records.query's `count` is the page length, so page through everything.
     const count = (await queryAll(tools, 'feedback', { componentId })).length
     must(await tools.update('components', componentId, { feedbackCount: count }), 'update feedback count')
+    await bumpLibraryVersion(tools) // cards show the count
     return count
   } catch (error) {
     console.error('[feedback] count refresh failed:', error instanceof Error ? error.message : error)

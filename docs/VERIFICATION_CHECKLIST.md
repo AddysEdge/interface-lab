@@ -17,6 +17,7 @@ or signed-out window.
 - [ ] Category filter and sort change the results and the URL; page resets to 1
 - [ ] Browser back/forward restores the previous filter and its results; refresh keeps them
 - [ ] A component page shows the preview and Copy HTML / Copy CSS work
+- [ ] Reusing a library URL after unpublishing no longer returns the component
 - [ ] Layout is usable on a phone-width screen
 
 ## Creator flow (account A)
@@ -35,6 +36,13 @@ or signed-out window.
 - [ ] B posts and immediately deletes a feedback item without reloading
 - [ ] B sees no Edit/Publish/Delete controls on A's component and `/studio/<A's id>` says not found
 - [ ] B cannot delete A's feedback (no control offered)
+- [ ] A can remove B's feedback on A's own component
+
+## Moderation (app owner)
+- [ ] The owner can hide a published component and its feedback from the public library
+- [ ] A creator cannot republish a hidden component until the owner restores it
+- [ ] Restoring leaves the component as a draft until its creator republishes
+- [ ] A non-owner cannot invoke moderation actions directly
 
 ## Integrations (one real call each; watch credits with `npx deepspace app usage`)
 - [ ] AI review returns suggestions; "Use these tags"/"Use this description" apply only after clicking, and need a save
@@ -45,6 +53,8 @@ or signed-out window.
 
 ## Isolation spot check
 - [ ] A component whose HTML contains `<script>alert(1)</script>` shows no alert and the page is unaffected
+- [ ] Stored JavaScript stays off until explicitly enabled; library cards never run it
+- [ ] A script that navigates its own frame is stopped and the preview resets with scripts off
 
 ## Notes
 Record anything that failed, with the time and the account used:
