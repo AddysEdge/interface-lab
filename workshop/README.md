@@ -106,6 +106,10 @@ fail-closed and reported as `visibility_incomplete`, and repeating the action re
 `createFeedback` re-checks the component after writing and withdraws the post if the component
 was unpublished in the meantime. Sync and the feedback counter page through every item (no cap).
 
+Server actions are registered with `waitUntil` (`src/server/action-routes.ts`), so once an action
+starts it runs to completion even if the client disconnects, for example by closing the tab right
+after deleting feedback. Without this, the worker cancelled the follow-up counter refresh.
+
 ## Agent instructions
 
 The scaffold's [AGENTS.md](AGENTS.md) documents the backend tooling. Keep product copy focused
