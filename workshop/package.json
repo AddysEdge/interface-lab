@@ -28,7 +28,8 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "test:isolation": "playwright test -c tests/isolation/playwright.config.ts",
-    "test:workshop": "deepspace test run tests/workshop.spec.ts"
+    "test:workshop": "deepspace test run tests/workshop.spec.ts",
+    "test:deployed": "playwright test -c tests/deployed.playwright.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "~1.6.0",
